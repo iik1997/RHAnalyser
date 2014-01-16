@@ -302,6 +302,7 @@ private:
   std::vector<TH1D*> etaBinEnergies_;
   std::vector<TH1D*> etaBinEts_;
   std::vector<TH1D*> etaBinTowEts_;
+  std::vector<TH1D*> etaBinPFEts_;
   std::vector<TH1D*> etaBinEnergies1trk_;
   std::vector<TH1D*> etaBinEnergies1trkL_;
   std::vector<TH1D*> etaBinEnergies1trkS_;
