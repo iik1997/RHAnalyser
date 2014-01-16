@@ -59,6 +59,7 @@ Implementation:
 #include "RecoLocalCalo/HcalRecAlgos/interface/HcalCaloFlagLabels.h"
 //#include "DataFormats/CaloTowers/interface/CaloTower.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
 // castor
 //#include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
@@ -297,6 +298,7 @@ private:
   TH1D* energy_vs_eta_reco_;
   TH1D* et_vs_eta_reco_;
   TH1D* towet_vs_eta_reco_;
+  TH1D* pfet_vs_eta_reco_;
   std::vector<TH1D*> etaBinEnergies_;
   std::vector<TH1D*> etaBinEts_;
   std::vector<TH1D*> etaBinTowEts_;
@@ -405,9 +407,14 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   towet_vs_eta_reco_->Sumw2();
   towet_vs_eta_reco_->SetXTitle("#eta");
   towet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");
+  pfet_vs_eta_reco_ = fs_->make<TH1D>("pfet_vs_eta_reco","Detector-level PF <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  pfet_vs_eta_reco_->Sumw2();
+  pfet_vs_eta_reco_->SetXTitle("#eta");
+  pfet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");  
   etaBinEnergies_.reserve(ForwardRecord::nbEtaBins);
   etaBinEts_.reserve(ForwardRecord::nbEtaBins);
   etaBinTowEts_.reserve(ForwardRecord::nbEtaBins);
+  etaBinPFEts_.reserve(ForwardRecord::nbEtaBins);
   etaBinEnergies1trk_.reserve(ForwardRecord::nbEtaBins);
   etaBinEnergies1trkL_.reserve(ForwardRecord::nbEtaBins);
   etaBinEnergies1trkS_.reserve(ForwardRecord::nbEtaBins);
@@ -432,6 +439,10 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
                               Form("Detector-level tower Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
                               48000,-12000.0,12000.0);
     etaBinTowEts_.push_back(theHistoAlike1);
+    TH1D* theHistoAlike2 = fs_->make<TH1D>(Form("pfet_reco_%d",ibin),
+                              Form("Detector-level PF Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+                              48000,-12000.0,12000.0);
+    etaBinPFEts_.push_back(theHistoAlike2);    
     TH1D* theHisto1 = fs_->make<TH1D>(Form("energy_reco_%d_1trk",ibin),
                       Form("Detector-level Energy in #eta %g:%g (1trk)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
                               24000,-12000.0,12000.0);
@@ -855,6 +866,19 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinTowEts_[ibin]->Fill(etaBinTowEts[ibin]);
+  
+  // ************************ PF Candidates   ****************************
+  
+  edm::Handle<reco::PFCandidateCollection> pfCandidates_h;
+  try{ iEvent.getByLabel(pfCandidateLabel_,pfCandidates_h); }
+  catch(...) { edm::LogWarning("PFCands ") << " Cannot get PFCands " << std::endl; }
+  
+  const reco::PFCandidateCollection *pfCandidateColl = pfCandidates_h.failedToGet()? 0 : &(*pfCandidates_h);  
+  
+  if (pfCandidateColl) {
+	for(unsigned icand=0;icand<pfCandidateColl->size(); icand++) {
+	}
+  }
 
   // ********************************* Vertex **************************** 
 
