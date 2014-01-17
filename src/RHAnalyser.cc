@@ -871,7 +871,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // ************************ PF Candidates   ****************************
   
   edm::Handle<reco::PFCandidateCollection> pfCandidates_h;
-  try{ iEvent.getByLabel(pfCandidateLabel_,pfCandidates_h); }
+  try{ iEvent.getByLabel("particleFlow",pfCandidates_h); }
   catch(...) { edm::LogWarning("PFCands ") << " Cannot get PFCands " << std::endl; }
   
   const reco::PFCandidateCollection *pfCandidateColl = pfCandidates_h.failedToGet()? 0 : &(*pfCandidates_h);  
