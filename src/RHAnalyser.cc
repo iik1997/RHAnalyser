@@ -295,10 +295,10 @@ private:
 
   MonVariables treeVariables_;
 
-  TH1D* energy_vs_eta_reco_;
-  TH1D* et_vs_eta_reco_;
-  TH1D* towet_vs_eta_reco_;
-  TH1D* pfet_vs_eta_reco_;
+  TProfile* energy_vs_eta_reco_;
+  TProfile* et_vs_eta_reco_;
+  TProfile* towet_vs_eta_reco_;
+  TProfile* pfet_vs_eta_reco_;
   std::vector<TH1D*> etaBinEnergies_;
   std::vector<TH1D*> etaBinEts_;
   std::vector<TH1D*> etaBinTowEts_;
@@ -396,19 +396,19 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   
   */
 
-  energy_vs_eta_reco_ = fs_->make<TH1D>("energy_vs_eta_reco","Detector-level <Energy> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  energy_vs_eta_reco_ = fs_->make<TProfile>("energy_vs_eta_reco","Detector-level <Energy> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
   energy_vs_eta_reco_->Sumw2();
   energy_vs_eta_reco_->SetXTitle("#eta");
   energy_vs_eta_reco_->SetYTitle("<E>/#Delta#eta");
-  et_vs_eta_reco_ = fs_->make<TH1D>("et_vs_eta_reco","Detector-level <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  et_vs_eta_reco_ = fs_->make<TProfile>("et_vs_eta_reco","Detector-level <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
   et_vs_eta_reco_->Sumw2();
   et_vs_eta_reco_->SetXTitle("#eta");
   et_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");
-  towet_vs_eta_reco_ = fs_->make<TH1D>("towet_vs_eta_reco","Detector-level tower <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  towet_vs_eta_reco_ = fs_->make<TProfile>("towet_vs_eta_reco","Detector-level tower <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
   towet_vs_eta_reco_->Sumw2();
   towet_vs_eta_reco_->SetXTitle("#eta");
   towet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");
-  pfet_vs_eta_reco_ = fs_->make<TH1D>("pfet_vs_eta_reco","Detector-level PF <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  pfet_vs_eta_reco_ = fs_->make<TProfile>("pfet_vs_eta_reco","Detector-level PF <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
   pfet_vs_eta_reco_->Sumw2();
   pfet_vs_eta_reco_->SetXTitle("#eta");
   pfet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");  
@@ -881,43 +881,35 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for(unsigned icand=0;icand<pfCandidateColl->size(); icand++) {
 		const reco::PFCandidate pfCandidate = pfCandidateColl->at(icand);
 		//pfCandidate.pt();//pfCandidate.particleId();//pfCandidate.eta();//pfCandidate.phi();
-		if() {
-			
-		}
-		const uint ibin = energy_vs_eta_reco_->FindBin( hit.eta() );		
-		if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += pfCandidate.pt();
+		double et = pfCandidate.pt();
+		double eta = pfCandidate.eta();
+		double energy = et*cosh(eta);		
+		int id = pfCandidate.particleId();
+		bool add_particle = false;
+        //X=0,           // undefined
+        //h=1,           // charged hadron
+        //e=2,           // electron 
+        //mu=3,          // muon 
+        //gamma=4,       // photon
+        //h0=5,          // neutral hadron
+        //h_HF=6,        // HF tower identified as a hadron
+        //egamma_HF=7    // HF tower identified as an EM particle		
+		if(id != 4 && id != 5 && id !=6 && id != 7) add_particle = true;
+        if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
+        if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
+        if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
+        if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
+        if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
+        if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;		
+        if(add_particle) {
+		  const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
+		  if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += et;
+	    }	
 	}
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinPFEts_[ibin]->Fill(etaBinPFEts[ibin]);
-
-//////
-      /*
-      long double energy = pfInfo.pfPt[ic]*TMath::CosH(pfInfo.pfEta[ic]);
-      long double pz     = pfInfo.pfPt[ic]*TMath::SinH(pfInfo.pfEta[ic]);
-      long double px     = pfInfo.pfPt[ic]*TMath::Cos(pfInfo.pfPhi[ic]);
-      long double py     = pfInfo.pfPt[ic]*TMath::Sin(pfInfo.pfPhi[ic]);
-      double eta    = pfInfo.pfEta[ic];
-      /////////
-      Bool_t addParticle = kFALSE; //see "Soft diffraction" AN2013_030_v6.pdf / section 12 / p.25 / FSQ-12-005
-      // http://cmslxr.fnal.gov/lxr/source/DataFormats/ParticleFlowCandidate/interface/PFCandidate.h
-      //X=0,     // undefined
-      //h=1,       // charged hadron
-      //e=2,       // electron 
-      //mu=3,      // muon 
-      //gamma=4,   // photon
-      //h0=5,      // neutral hadron
-      //h_HF=6,        // HF tower identified as a hadron
-      //egamma_HF=7    // HF tower identified as an EM particle
-      //if(pfInfo.pfId[ic] != 4 || pfInfo.pfId[ic] != 5 || pfInfo.pfId[ic] != 6 || pfInfo.pfId[ic] != 7) addParticle = kTRUE; --> stupid bug: true always!
-      if(pfInfo.pfId[ic] != 4 && pfInfo.pfId[ic] != 5 && pfInfo.pfId[ic] != 6 && pfInfo.pfId[ic] != 7) addParticle = kTRUE;
-      if(pfInfo.pfEta[ic] > 0.0 && pfInfo.pfEta[ic] < 1.4 && pfInfo.pfId[ic] == 4 && energy > 0.4) addParticle = kTRUE;
-      if(pfInfo.pfEta[ic] > 0.0 && pfInfo.pfEta[ic] < 1.4 && pfInfo.pfId[ic] == 5 && energy > 2.0) addParticle = kTRUE;
-      if(pfInfo.pfEta[ic] > 1.4 && pfInfo.pfEta[ic] < 3.2 && pfInfo.pfId[ic] == 4 && energy > 1.8) addParticle = kTRUE;
-      if(pfInfo.pfEta[ic] > 1.4 && pfInfo.pfEta[ic] < 3.2 && pfInfo.pfId[ic] == 5 && energy > 2.9) addParticle = kTRUE;
-      if(pfInfo.pfEta[ic] > 3.2 && pfInfo.pfEta[ic] < 5.0 && pfInfo.pfId[ic] == 6 && energy > 4.0) addParticle = kTRUE;
-      if(pfInfo.pfEta[ic] > 3.2 && pfInfo.pfEta[ic] < 5.0 && pfInfo.pfId[ic] == 7 && energy > 4.0) addParticle = kTRUE;    
-      */
-//////
+  
+  // ***TODO: GenParticles***
 
 
   // ********************************* Vertex **************************** 
@@ -988,14 +980,14 @@ RHAnalyser::endJob()
      double width = fabs(ForwardRecord::Eta_Bin_Edges[ibin+1]-ForwardRecord::Eta_Bin_Edges[ibin]);
      if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << "MEAN-e: " << etaBinEnergies_[ibin]->GetMean(1) << "MEAN-et: " << etaBinEts_[ibin]->GetMean(1) << " Width: " << width << std::endl;
      if(width > 1e-9) {
-       energy_vs_eta_reco_->SetBinContent(ibin+1,etaBinEnergies_[ibin]->GetMean(1)/width);
-       energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
-       et_vs_eta_reco_->SetBinContent(ibin+1,etaBinEts_[ibin]->GetMean(1)/width);
-       et_vs_eta_reco_->SetBinError(ibin+1,etaBinEts_[ibin]->GetMeanError(1)/width);       
-       towet_vs_eta_reco_->SetBinContent(ibin+1,etaBinTowEts_[ibin]->GetMean(1)/width);
-       towet_vs_eta_reco_->SetBinError(ibin+1,etaBinTowEts_[ibin]->GetMeanError(1)/width);   
-       pfet_vs_eta_reco_->SetBinContent(ibin+1,etaBinPFEts_[ibin]->GetMean(1)/width);
-       pfet_vs_eta_reco_->SetBinError(ibin+1,etaBinPFEts_[ibin]->GetMeanError(1)/width);   
+       energy_vs_eta_reco_->Fill(ibin+1,etaBinEnergies_[ibin]->GetMean(1)/width);
+       //energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
+       et_vs_eta_reco_->Fill(ibin+1,etaBinEts_[ibin]->GetMean(1)/width);
+       //et_vs_eta_reco_->SetBinError(ibin+1,etaBinEts_[ibin]->GetMeanError(1)/width);       
+       towet_vs_eta_reco_->Fill(ibin+1,etaBinTowEts_[ibin]->GetMean(1)/width);
+       //towet_vs_eta_reco_->SetBinError(ibin+1,etaBinTowEts_[ibin]->GetMeanError(1)/width);   
+       pfet_vs_eta_reco_->Fill(ibin+1,etaBinPFEts_[ibin]->GetMean(1)/width);
+       //pfet_vs_eta_reco_->SetBinError(ibin+1,etaBinPFEts_[ibin]->GetMeanError(1)/width);   
      }
      //if(width > 1e-9) energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetRMS(1)/width);
   }
