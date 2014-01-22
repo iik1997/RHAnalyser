@@ -881,30 +881,30 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for(unsigned icand=0;icand<pfCandidateColl->size(); icand++) {
 		const reco::PFCandidate pfCandidate = pfCandidateColl->at(icand);
 		//pfCandidate.pt();//pfCandidate.particleId();//pfCandidate.eta();//pfCandidate.phi();
-		double et = pfCandidate.pt();
-		double eta = pfCandidate.eta();
-		double energy = et*cosh(eta);		
-		int id = pfCandidate.particleId();
-		bool add_particle = false;
-        //X=0,           // undefined
-        //h=1,           // charged hadron
-        //e=2,           // electron 
-        //mu=3,          // muon 
-        //gamma=4,       // photon
-        //h0=5,          // neutral hadron
-        //h_HF=6,        // HF tower identified as a hadron
-        //egamma_HF=7    // HF tower identified as an EM particle		
-		if(id != 4 && id != 5 && id !=6 && id != 7) add_particle = true;
-        if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
-        if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
-        if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
-        if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
-        if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
-        if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;		
-        if(add_particle) {
+	   double et = pfCandidate.pt();
+	   double eta = pfCandidate.eta();
+	   double energy = et*cosh(eta);		
+       	   int id = pfCandidate.particleId();
+	   bool add_particle = false;
+           //X=0,           // undefined
+           //h=1,           // charged hadron
+           //e=2,           // electron 
+           //mu=3,          // muon 
+           //gamma=4,       // photon
+           //h0=5,          // neutral hadron
+           //h_HF=6,        // HF tower identified as a hadron
+           //egamma_HF=7    // HF tower identified as an EM particle		
+	   if(id != 4 && id != 5 && id !=6 && id != 7) add_particle = true;
+           if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
+           if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
+           if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
+           if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
+           if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
+           if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;		
+           if(add_particle) {
 		  const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
 		  if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += et;
-	    }	
+	   }	
 	}
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinPFEts_[ibin]->Fill(etaBinPFEts[ibin]);
