@@ -62,6 +62,8 @@ Implementation:
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 // castor
 //#include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
