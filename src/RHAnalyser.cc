@@ -18,6 +18,7 @@ Implementation:
 //
 
 /***************************/
+//Also check the label of genParticles//
 /**********!!!**************/
 // #define OLD_428_DATA 
 #define THIS_IS_MC
@@ -894,7 +895,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
            //h0=5,          // neutral hadron
            //h_HF=6,        // HF tower identified as a hadron
            //egamma_HF=7    // HF tower identified as an EM particle		
-	   if(id != 4 && id != 5 && id !=6 && id != 7) add_particle = true;
+	   if(id != 4 && id != 5 && id != 6 && id != 7) add_particle = true;
            if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
            if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
            if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
@@ -909,7 +910,32 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinPFEts_[ibin]->Fill(etaBinPFEts[ibin]);
   
-  // ***TODO: GenParticles***
+  // ************************ GenParticles ****************************
+  
+  if(!isData){
+      edm::Handle<reco::GenParticleCollection> genParticles;
+      try { iEvent.getByLabel("hiGenParticles",genParticles); }
+      catch (...) { edm::LogWarning(" GenPart ") << "No GenParticles found!" << std::endl; }
+      
+      const reco::GenParticleCollection* genColl= genParticles.failedToGet()? 0 : &(*genParticles);
+      
+      if (genColl) {
+         for(unsigned igen=0;igen<genColl->size(); igen++) {
+			 const reco::GenParticle gen = genColl->at(igen);
+			 int status = gen.status();
+			 int id = gen.pdgId();			 
+             if (status != 1) continue;
+             if (abs(id) == 12 || //muon + neutrinos //muons in case of particle flow???
+                 abs(id) == 14 ||
+                 abs(id) == 16 ||
+                 abs(id) == 13) continue;
+             double energy = gen.energy();
+             double pt = gen.pt();
+             double eta = gen.eta();
+             //double rap = ;		  
+	     }
+	  }
+  }
 
 
   // ********************************* Vertex **************************** 
