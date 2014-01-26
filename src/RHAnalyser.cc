@@ -5,10 +5,10 @@
 // 
 /**\class RHAnalyser RHAnalyser.cc Analysis/RHAnalyser/src/RHAnalyser.cc
 
-Description: [one line class summary]
+   Description: [one line class summary]
 
-Implementation:
-[Notes on implementation]
+   Implementation:
+   [Notes on implementation]
 */
 //
 // Original Author:  Igor Katkov,32 4-A19,+41227676358,
@@ -102,23 +102,23 @@ namespace ForwardRecord {
   
   const uint nbEtaBins = 16;
   const double Eta_Bin_Edges[nbEtaBins+1] = {
-     -5.19, 
-     -4.89, 
-     -4.54, 
-     -4.19, 
-     -3.84, 
-     -3.49,
-     -3.14,
-     -2.65,
-      0.00,
-      2.65, 
-      3.14, 
-      3.49, 
-      3.84, 
-      4.19, 
-      4.54, 
-      4.89, 
-      5.19
+    -5.19, 
+    -4.89, 
+    -4.54, 
+    -4.19, 
+    -3.84, 
+    -3.49,
+    -3.14,
+    -2.65,
+    0.00,
+    2.65, 
+    3.14, 
+    3.49, 
+    3.84, 
+    4.19, 
+    4.54, 
+    4.89, 
+    5.19
   };
 
   const unsigned int CSectors = 16;
@@ -133,7 +133,7 @@ namespace ForwardRecord {
 
 namespace castor {
 
-//using for Katerina's value's (some correction values seem too big (for me big is all >3), some are zeros)
+  //using for Katerina's value's (some correction values seem too big (for me big is all >3), some are zeros)
   const bool channelQuality[ForwardRecord::CSectors][ForwardRecord::CModules] =             // sector
     //mod 1   2     3     4     5      6    7     8     9    10     11    12   13    14
     {{true ,true ,true ,false,true ,true ,false,true ,true ,true ,true ,true ,true ,true }, // 1
@@ -154,6 +154,7 @@ namespace castor {
      {true ,true ,true ,true ,true ,false,false,false,true ,true ,true ,true ,true ,true }};// 16 //m8s16-strange-noise-peak(SNP),closer look needed
 
 #ifdef OLD_428_DATA
+  //prompt-reco rechits most likely include already intercalibration (but likely not the em-factor 2); why do you try to apply it once again?
   const double channelIntercalibCorr[ForwardRecord::CSectors][ForwardRecord::CModules] =
     {{     1.3701 ,    1.4709 ,    0.6117 ,    0.8972 ,    0.4640 ,    0.1848 ,    9.7444 ,    0.3365 ,    0.2572 ,    0.4714 ,    0.3240 ,    0.1967 ,    0.3084 ,    0.1645  },
      {     1.2265 ,    1.4897 ,    0.7495 ,    0.7318 ,    0.3955 ,    0.3050 ,    5.5303 ,    2.0929 ,    0.2538 ,    0.4026 ,    0.4191 ,    0.2082 ,    0.3169 ,    0.1957  },
@@ -190,7 +191,7 @@ namespace castor {
      {     0.5000 ,    0.5000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000  },
      {     0.5000 ,    0.5000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000  }};
 #else
-// Katerina's values using halo muon data (w/o TOTEM), already scaled by s9m4
+  // Katerina's values using halo muon data (w/o TOTEM), already scaled by s9m4
   const double channelGainQE[ForwardRecord::CSectors][ForwardRecord::CModules] =                                                                                // sector
     //mod 1          2          3          4           5          6          7         8          9          10         11          12        13           14
     {{  0.7510,    0.8700,    2.7370,    0.0000,    0.3630,    0.6430,    0.0000,    0.3100,    0.2120,    0.2740,    0.3030,    0.1690,    0.2650,    0.1550}, //1
@@ -259,30 +260,30 @@ private:
     double vtx1Y;
     double vtx1X;
 
-/*
+    /*
     
-    int nbCasRecHits;
-    double casRecHitEnergy[224];
-    int    casRecHitIphi[224];
-    int    casRecHitIdepth[224];
-    int    casRecHitSaturation[224];
+      int nbCasRecHits;
+      double casRecHitEnergy[224];
+      int    casRecHitIphi[224];
+      int    casRecHitIdepth[224];
+      int    casRecHitSaturation[224];
 
-    int nbZDCRecHits;
-    double zdcRecHitEnergy[18];
-    int    zdcRecHitIside[18];
-    int    zdcRecHitIsection [18];
-    int    zdcRecHitIchannel[18];
-    int    zdcRecHitSaturation[18];
+      int nbZDCRecHits;
+      double zdcRecHitEnergy[18];
+      int    zdcRecHitIside[18];
+      int    zdcRecHitIsection [18];
+      int    zdcRecHitIchannel[18];
+      int    zdcRecHitSaturation[18];
 
-    int nbZDCDigis;
-    int nbZDCDigiTs;
-    double zdcDigiEnergyFC[18][10];
-    int    zdcDigiEnergyADC[18][10];
-    int    zdcDigiIside[18];
-    int    zdcDigiIsection[18];
-    int    zdcDigiIchannel[18];
+      int nbZDCDigis;
+      int nbZDCDigiTs;
+      double zdcDigiEnergyFC[18][10];
+      int    zdcDigiEnergyADC[18][10];
+      int    zdcDigiIside[18];
+      int    zdcDigiIsection[18];
+      int    zdcDigiIchannel[18];
 
-*/
+    */
     
   };
 
@@ -302,10 +303,12 @@ private:
   TProfile* et_vs_eta_reco_;
   TProfile* towet_vs_eta_reco_;
   TProfile* pfet_vs_eta_reco_;
+  TProfile* genet_vs_eta_reco_;
   std::vector<TH1D*> etaBinEnergies_;
   std::vector<TH1D*> etaBinEts_;
   std::vector<TH1D*> etaBinTowEts_;
   std::vector<TH1D*> etaBinPFEts_;
+  std::vector<TH1D*> etaBinGenEts_;
   std::vector<TH1D*> etaBinEnergies1trk_;
   std::vector<TH1D*> etaBinEnergies1trkL_;
   std::vector<TH1D*> etaBinEnergies1trkS_;
@@ -345,9 +348,9 @@ private:
 RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   _ShowDebug ( iConfig.getUntrackedParameter<bool>("showDebug",true) ),
   _VtxSrc ( iConfig.getUntrackedParameter<edm::InputTag>("vtxSrc",edm::InputTag("offlinePrimaryVertices")) ), 
-//pp: "offlinePrimaryVertices"//HI: "hiSelectedVertex"
+  //pp: "offlinePrimaryVertices"//HI: "hiSelectedVertex"
   _TrkSrc ( iConfig.getUntrackedParameter<edm::InputTag>("trkSrc",edm::InputTag("generalTracks")) ),
-//pp: "generalTracks" //OldHI44X: "hiSelectedTracks" //NewHI53X: "hiGeneralTracks"
+  //pp: "generalTracks" //OldHI44X: "hiSelectedTracks" //NewHI53X: "hiGeneralTracks"
   runningSampleEnergySum_(6,0.0),
   runningSamplesNo_(6,0) 
 {
@@ -376,26 +379,26 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
 
   /*
  
-  rhtree_->Branch("nbCasRecHits",&treeVariables_.nbCasRecHits,"nbCasRecHits/i");
-  rhtree_->Branch("casRecHitEnergy",treeVariables_.casRecHitEnergy,"casRecHitEnergy[nbCasRecHits]/D");
-  rhtree_->Branch("casRecHitIphi",treeVariables_.casRecHitIphi,"casRecHitIphi[nbCasRecHits]/I");
-  rhtree_->Branch("casRecHitIdepth",treeVariables_.casRecHitIdepth,"casRecHitIdepth[nbCasRecHits]/I");
-  rhtree_->Branch("casRecHitSaturation",treeVariables_.casRecHitSaturation,"casRecHitSaturation[nbCasRecHits]/I");
+    rhtree_->Branch("nbCasRecHits",&treeVariables_.nbCasRecHits,"nbCasRecHits/i");
+    rhtree_->Branch("casRecHitEnergy",treeVariables_.casRecHitEnergy,"casRecHitEnergy[nbCasRecHits]/D");
+    rhtree_->Branch("casRecHitIphi",treeVariables_.casRecHitIphi,"casRecHitIphi[nbCasRecHits]/I");
+    rhtree_->Branch("casRecHitIdepth",treeVariables_.casRecHitIdepth,"casRecHitIdepth[nbCasRecHits]/I");
+    rhtree_->Branch("casRecHitSaturation",treeVariables_.casRecHitSaturation,"casRecHitSaturation[nbCasRecHits]/I");
 
-  rhtree_->Branch("nbZDCRecHits",&treeVariables_.nbZDCRecHits,"nbZDCRecHits/i");
-  rhtree_->Branch("zdcRecHitEnergy",treeVariables_.zdcRecHitEnergy,"zdcRecHitEnergy[nbZDCRecHits]/D");
-  rhtree_->Branch("zdcRecHitIside",treeVariables_.zdcRecHitIside,"zdcRecHitIside[nbZDCRecHits]/I");
-  rhtree_->Branch("zdcRecHitIsection",treeVariables_.zdcRecHitIsection,"zdcRecHitIsection[nbZDCRecHits]/I");
-  rhtree_->Branch("zdcRecHitIchannel",treeVariables_.zdcRecHitIchannel,"zdcRecHitIchannel[nbZDCRecHits]/I");
-  rhtree_->Branch("zdcRecHitSaturation",treeVariables_.zdcRecHitSaturation,"zdcRecHitSaturation[nbZDCRecHits]/I");
+    rhtree_->Branch("nbZDCRecHits",&treeVariables_.nbZDCRecHits,"nbZDCRecHits/i");
+    rhtree_->Branch("zdcRecHitEnergy",treeVariables_.zdcRecHitEnergy,"zdcRecHitEnergy[nbZDCRecHits]/D");
+    rhtree_->Branch("zdcRecHitIside",treeVariables_.zdcRecHitIside,"zdcRecHitIside[nbZDCRecHits]/I");
+    rhtree_->Branch("zdcRecHitIsection",treeVariables_.zdcRecHitIsection,"zdcRecHitIsection[nbZDCRecHits]/I");
+    rhtree_->Branch("zdcRecHitIchannel",treeVariables_.zdcRecHitIchannel,"zdcRecHitIchannel[nbZDCRecHits]/I");
+    rhtree_->Branch("zdcRecHitSaturation",treeVariables_.zdcRecHitSaturation,"zdcRecHitSaturation[nbZDCRecHits]/I");
 
-  rhtree_->Branch("nbZDCDigis",&treeVariables_.nbZDCDigis,"nbZDCDigis/i");
-  rhtree_->Branch("nbZDCDigiTs",&treeVariables_.nbZDCDigiTs,"nbZDCDigiTs/i");
-  rhtree_->Branch("zdcDigiIside",treeVariables_.zdcDigiIside,"zdcDigiIside[nbZDCDigis]/I");
-  rhtree_->Branch("zdcDigiIsection",treeVariables_.zdcDigiIsection,"zdcDigiIsection[nbZDCDigis]/I");
-  rhtree_->Branch("zdcDigiIchannel",treeVariables_.zdcDigiIchannel,"zdcDigiIchannel[nbZDCDigis]/I");
-  rhtree_->Branch("zdcDigiEnergyFC",treeVariables_.zdcDigiEnergyFC,"zdcDigiEnergyFC[nbZDCDigis][nbZDCDigiTs]/D");
-  rhtree_->Branch("zdcDigiEnergyADC",treeVariables_.zdcDigiEnergyADC,"zdcDigiEnergyADC[nbZDCDigis][nbZDCDigiTs]/I");
+    rhtree_->Branch("nbZDCDigis",&treeVariables_.nbZDCDigis,"nbZDCDigis/i");
+    rhtree_->Branch("nbZDCDigiTs",&treeVariables_.nbZDCDigiTs,"nbZDCDigiTs/i");
+    rhtree_->Branch("zdcDigiIside",treeVariables_.zdcDigiIside,"zdcDigiIside[nbZDCDigis]/I");
+    rhtree_->Branch("zdcDigiIsection",treeVariables_.zdcDigiIsection,"zdcDigiIsection[nbZDCDigis]/I");
+    rhtree_->Branch("zdcDigiIchannel",treeVariables_.zdcDigiIchannel,"zdcDigiIchannel[nbZDCDigis]/I");
+    rhtree_->Branch("zdcDigiEnergyFC",treeVariables_.zdcDigiEnergyFC,"zdcDigiEnergyFC[nbZDCDigis][nbZDCDigiTs]/D");
+    rhtree_->Branch("zdcDigiEnergyADC",treeVariables_.zdcDigiEnergyADC,"zdcDigiEnergyADC[nbZDCDigis][nbZDCDigiTs]/I");
   
   */
 
@@ -415,10 +418,15 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   pfet_vs_eta_reco_->Sumw2();
   pfet_vs_eta_reco_->SetXTitle("#eta");
   pfet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");  
+  genet_vs_eta_reco_ = fs_->make<TProfile>("genet_vs_eta_reco","Particle-level <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  genet_vs_eta_reco_->Sumw2();
+  genet_vs_eta_reco_->SetXTitle("#eta");
+  genet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");  
   etaBinEnergies_.reserve(ForwardRecord::nbEtaBins);
   etaBinEts_.reserve(ForwardRecord::nbEtaBins);
   etaBinTowEts_.reserve(ForwardRecord::nbEtaBins);
   etaBinPFEts_.reserve(ForwardRecord::nbEtaBins);
+  etaBinGenEts_.reserve(ForwardRecord::nbEtaBins);
   etaBinEnergies1trk_.reserve(ForwardRecord::nbEtaBins);
   etaBinEnergies1trkL_.reserve(ForwardRecord::nbEtaBins);
   etaBinEnergies1trkS_.reserve(ForwardRecord::nbEtaBins);
@@ -426,8 +434,8 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   etaBinEnergiesNSD_.reserve(ForwardRecord::nbEtaBins);
   for(unsigned int ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++){
     TH1D* theHisto = fs_->make<TH1D>(Form("energy_reco_%d",ibin),
-                              Form("Detector-level Energy in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              24000,-12000.0,12000.0);//2020,-136.50,13635.00);
+				     Form("Detector-level Energy in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+				     24000,-12000.0,12000.0);//2020,-136.50,13635.00);
     theHisto->Sumw2();
     theHisto->SetYTitle("Entries");
     theHisto->SetXTitle("Energy");
@@ -436,49 +444,53 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
     theHisto->GetXaxis()->SetNdivisions(505);
     etaBinEnergies_.push_back(theHisto);
     TH1D* theHistoAlike = fs_->make<TH1D>(Form("et_reco_%d",ibin),
-                              Form("Detector-level Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              48000,-12000.0,12000.0);
+					  Form("Detector-level Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+					  48000,-12000.0,12000.0);
     etaBinEts_.push_back(theHistoAlike);
     TH1D* theHistoAlike1 = fs_->make<TH1D>(Form("towet_reco_%d",ibin),
-                              Form("Detector-level tower Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              48000,-12000.0,12000.0);
+					   Form("Detector-level tower Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+					   48000,-12000.0,12000.0);
     etaBinTowEts_.push_back(theHistoAlike1);
     TH1D* theHistoAlike2 = fs_->make<TH1D>(Form("pfet_reco_%d",ibin),
-                              Form("Detector-level PF Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              48000,-12000.0,12000.0);
+					   Form("Detector-level PF Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+					   48000,-12000.0,12000.0);
     etaBinPFEts_.push_back(theHistoAlike2);    
+    TH1D* theHistoAlike3 = fs_->make<TH1D>(Form("genet_reco_%d",ibin),
+					   Form("Particle-level Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+					   48000,-12000.0,12000.0);
+    etaBinGenEts_.push_back(theHistoAlike3);    
     TH1D* theHisto1 = fs_->make<TH1D>(Form("energy_reco_%d_1trk",ibin),
-                      Form("Detector-level Energy in #eta %g:%g (1trk)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              24000,-12000.0,12000.0);
+				      Form("Detector-level Energy in #eta %g:%g (1trk)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+				      24000,-12000.0,12000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trk",ibin)); 
     theHisto1->Sumw2();
     etaBinEnergies1trk_.push_back(theHisto1);
     TH1D* theHisto2 = fs_->make<TH1D>(Form("energy_reco_%d_1trkL",ibin),
-                      Form("Detector-level Energy in #eta %g:%g (1trk&L)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              24000,-12000.0,12000.0);
+				      Form("Detector-level Energy in #eta %g:%g (1trk&L)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+				      24000,-12000.0,12000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trkL",ibin));
     theHisto2->Sumw2();
     etaBinEnergies1trkL_.push_back(theHisto2);
     TH1D* theHisto3 = fs_->make<TH1D>(Form("energy_reco_%d_1trkS",ibin),
-                      Form("Detector-level Energy in #eta %g:%g (1trk&S)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              24000,-12000.0,12000.0);
+				      Form("Detector-level Energy in #eta %g:%g (1trk&S)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+				      24000,-12000.0,12000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trkS",ibin));
     theHisto3->Sumw2();
     etaBinEnergies1trkS_.push_back(theHisto3);
     TH1D* theHisto4 = fs_->make<TH1D>(Form("energy_reco_%d_1trk4",ibin),
-                      Form("Detector-level Energy in #eta %g:%g (1trk&4)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              24000,-12000.0,12000.0);
+				      Form("Detector-level Energy in #eta %g:%g (1trk&4)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+				      24000,-12000.0,12000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trk4",ibin));
     theHisto4->Sumw2();
     etaBinEnergies1trk4_.push_back(theHisto4);
     TH1D* theHisto5 = fs_->make<TH1D>(Form("energy_reco_%d_bx",ibin),
-                      Form("Detector-level Energy in #eta %g:%g (bx)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              24000,-12000.0,12000.0);
+				      Form("Detector-level Energy in #eta %g:%g (bx)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+				      24000,-12000.0,12000.0);
     theHisto5->Sumw2();
     etaBinEnergiesBX_.push_back(theHisto5);
     TH1D* theHisto6 = fs_->make<TH1D>(Form("energy_reco_%d_nsd",ibin),
-                      Form("Detector-level Energy in #eta %g:%g (NSD)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-                              24000,-12000.0,12000.0);
+				      Form("Detector-level Energy in #eta %g:%g (NSD)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
+				      24000,-12000.0,12000.0);
     theHisto6->Sumw2();
     etaBinEnergiesNSD_.push_back(theHisto6);
   }  
@@ -615,7 +627,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	treeVariables_.casRecHitIphi[nhits] = castorid.sector();
 	treeVariables_.casRecHitIdepth[nhits] = castorid.module();
         treeVariables_.casRecHitSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
-      }*/
+	}*/
       nhits++;
     } // end loop castor rechits
     if (_ShowDebug && casrechits->size() > 0) edm::LogVerbatim(" CastorRecHits ") << " Castor energy: " << energyCastor << std::endl;
@@ -625,9 +637,9 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   cas_etot15_->Fill(energyCastor15);
   cas_etot1114_->Fill(energyCastor1114);
   for(uint ibin = 0; ibin < 16; ibin++) {
-     cas_phiprofile_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor[ibin]);
-     cas_phiprofile15_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor15[ibin]);
-     cas_phiprofile1114_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor1114[ibin]); 
+    cas_phiprofile_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor[ibin]);
+    cas_phiprofile15_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor15[ibin]);
+    cas_phiprofile1114_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor1114[ibin]); 
   }
   for(uint ibin = 0; ibin < 14; ibin++) cas_zprofile_->Fill(static_cast<double>(ibin+1),moduleEnergyCastor[ibin]);
 
@@ -643,22 +655,22 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   int nZhits = 0; 
   double energyZDC = 0;
   if (zdcrechits) {
-    if (_ShowDebug) edm::LogVerbatim("ZDCRecHits") << " ZDCRecHitCollection size: " << zdcrechits->size() << std::endl;
-    for( size_t i1 = 0; i1<zdcrechits->size(); ++i1){
-      const ZDCRecHit & zdcrechit = (*zdcrechits)[i1];
-      energyZDC += zdcrechit.energy();
-      if (nZhits < 18) {
-	treeVariables_.nbZDCRecHits = nZhits + 1;
-	treeVariables_.zdcRecHitEnergy[nZhits] = zdcrechit.energy();
-	treeVariables_.zdcRecHitIside[nZhits] = zdcrechit.id().zside();
-	treeVariables_.zdcRecHitIsection[nZhits] = zdcrechit.id().section();
-	treeVariables_.zdcRecHitIchannel[nZhits] = zdcrechit.id().channel();
-	//#include "RecoLocalCalo/HcalRecAlgos/interface/HcalCaloFlagLabels.h"
-	treeVariables_.zdcRecHitSaturation[nZhits] = static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
-      }
-      nZhits++;
-    } // enf of loop zdc rechits
-    if (_ShowDebug && zdcrechits->size() > 0) edm::LogVerbatim(" ZDCRecHits ") << " ZDC energy: " << energyZDC << std::endl;
+  if (_ShowDebug) edm::LogVerbatim("ZDCRecHits") << " ZDCRecHitCollection size: " << zdcrechits->size() << std::endl;
+  for( size_t i1 = 0; i1<zdcrechits->size(); ++i1){
+  const ZDCRecHit & zdcrechit = (*zdcrechits)[i1];
+  energyZDC += zdcrechit.energy();
+  if (nZhits < 18) {
+  treeVariables_.nbZDCRecHits = nZhits + 1;
+  treeVariables_.zdcRecHitEnergy[nZhits] = zdcrechit.energy();
+  treeVariables_.zdcRecHitIside[nZhits] = zdcrechit.id().zside();
+  treeVariables_.zdcRecHitIsection[nZhits] = zdcrechit.id().section();
+  treeVariables_.zdcRecHitIchannel[nZhits] = zdcrechit.id().channel();
+  //#include "RecoLocalCalo/HcalRecAlgos/interface/HcalCaloFlagLabels.h"
+  treeVariables_.zdcRecHitSaturation[nZhits] = static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+  }
+  nZhits++;
+  } // enf of loop zdc rechits
+  if (_ShowDebug && zdcrechits->size() > 0) edm::LogVerbatim(" ZDCRecHits ") << " ZDC energy: " << energyZDC << std::endl;
   }
   else { edm::LogVerbatim("ZDCRecHits") << " Empty ZDCRecHitCollection" << std::endl; }
 
@@ -672,35 +684,35 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   int nZdigi = 0;
   if( zdc_digi ) {
-    if( zdc_digi->size() > 0 ) {
-      if (_ShowDebug) edm::LogVerbatim("ZDCDigi") << " ZDCDigiCollection  size: " << zdc_digi->size() << std::endl;
-      for ( ZDCDigiCollection::const_iterator j=zdc_digi->begin(); j != zdc_digi->end(); ++j ) {
-        double energyZDCDigi = 0;
-	const ZDCDataFrame& digi = (const ZDCDataFrame)(*j);
-	if (nZdigi < 18) {
-          treeVariables_.nbZDCDigis = nZdigi + 1;   
-          treeVariables_.zdcDigiIside[nZdigi] = digi.id().zside();
-          treeVariables_.zdcDigiIsection[nZdigi] = digi.id().section();
-          treeVariables_.zdcDigiIchannel[nZdigi] = digi.id().channel();
-          //CapIdTs0 = digi.sample(0).capid();
-          int lastTS = digi.size() <= 10 ? digi.size() : 10;
-          treeVariables_.nbZDCDigiTs = lastTS;
-          for(int ts = 0; ts < lastTS; ts++){
-            double energy = 2.6*digi.sample(ts).nominal_fC();     //2.6*digi[ts].nominal_fC();
-            energyZDCDigi =+ energy;
-            treeVariables_.zdcDigiEnergyFC[nZdigi][ts] = energy;
-            treeVariables_.zdcDigiEnergyADC[nZdigi][ts] = digi.sample(ts).adc();
-          } //end of loop zdc digi time slices
-	}
-        nZdigi++;
-        if (_ShowDebug) edm::LogVerbatim(" ZDCDigi ") << " ZDC energy (all ts FC): " << energyZDCDigi << " TS#: " << treeVariables_.nbZDCDigiTs << std::endl;
-      } // end loop zdc digis
+  if( zdc_digi->size() > 0 ) {
+  if (_ShowDebug) edm::LogVerbatim("ZDCDigi") << " ZDCDigiCollection  size: " << zdc_digi->size() << std::endl;
+  for ( ZDCDigiCollection::const_iterator j=zdc_digi->begin(); j != zdc_digi->end(); ++j ) {
+  double energyZDCDigi = 0;
+  const ZDCDataFrame& digi = (const ZDCDataFrame)(*j);
+  if (nZdigi < 18) {
+  treeVariables_.nbZDCDigis = nZdigi + 1;   
+  treeVariables_.zdcDigiIside[nZdigi] = digi.id().zside();
+  treeVariables_.zdcDigiIsection[nZdigi] = digi.id().section();
+  treeVariables_.zdcDigiIchannel[nZdigi] = digi.id().channel();
+  //CapIdTs0 = digi.sample(0).capid();
+  int lastTS = digi.size() <= 10 ? digi.size() : 10;
+  treeVariables_.nbZDCDigiTs = lastTS;
+  for(int ts = 0; ts < lastTS; ts++){
+  double energy = 2.6*digi.sample(ts).nominal_fC();     //2.6*digi[ts].nominal_fC();
+  energyZDCDigi =+ energy;
+  treeVariables_.zdcDigiEnergyFC[nZdigi][ts] = energy;
+  treeVariables_.zdcDigiEnergyADC[nZdigi][ts] = digi.sample(ts).adc();
+  } //end of loop zdc digi time slices
+  }
+  nZdigi++;
+  if (_ShowDebug) edm::LogVerbatim(" ZDCDigi ") << " ZDC energy (all ts FC): " << energyZDCDigi << " TS#: " << treeVariables_.nbZDCDigiTs << std::endl;
+  } // end loop zdc digis
 
-    } else {
-      if (_ShowDebug) edm::LogVerbatim("ZDCDigi") << " ZDCDigiCollection pointer not empty; but nothing in it: " << zdc_digi->size()  << std::endl;
-    }
   } else {
-    if (_ShowDebug) edm::LogVerbatim("ZDCDigi") << " Empty ZDCDigiCollection pointer "  << std::endl;
+  if (_ShowDebug) edm::LogVerbatim("ZDCDigi") << " ZDCDigiCollection pointer not empty; but nothing in it: " << zdc_digi->size()  << std::endl;
+  }
+  } else {
+  if (_ShowDebug) edm::LogVerbatim("ZDCDigi") << " Empty ZDCDigiCollection pointer "  << std::endl;
   }
 
   */
@@ -773,51 +785,51 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     hfNo = hfrechits->size();
     if (_ShowDebug) edm::LogVerbatim("HFRecHits") << " HFRecHitCollection size: " << hfrechits->size() << std::endl;
     for(size_t i1 = 0; i1 < hfrechits->size(); ++i1){
-       const HFRecHit & hfrh = (*hfrechits)[i1];
-       HcalDetId hfid = hfrh.id();
-       //std::cout << hfid << std::endl;
-       //hfShortThreshold_ && hit.id().depth() != 1
-       //hfLongThreshold_ && hit.id().depth() == 1
-       double eta = geo->getPosition(hfid).eta();
-       if (fabs(eta) < 4.0) {
-          runningSampleEnergySum_[0] += hfrh.energy(); 
-          (runningSamplesNo_[0])++;
-          runningSampleEnergySum_[2] += hfrh.energy()/cosh(eta);
-          (runningSamplesNo_[2])++;
-       }
-       if (fabs(eta) > 4.0) {
-          runningSampleEnergySum_[1] += hfrh.energy(); 
-          (runningSamplesNo_[1])++;
-          runningSampleEnergySum_[3] += hfrh.energy()/cosh(eta);
-          (runningSamplesNo_[3])++;
-       }
-       if (eta > 0.0) {
-          hfpE += hfrh.energy();
-          if (hfrh.energy() > 4.0) hfpNo4++;
-       } else {
-          hfmE += hfrh.energy();
-          if (hfrh.energy() > 4.0) hfmNo4++;
-       }
-       const uint ibin = energy_vs_eta_reco_->FindBin( eta ); 
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergies[ibin-1] += hfrh.energy();
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEts[ibin-1] += hfrh.energy()/cosh(eta); 
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergies1trk[ibin-1] += hfrh.energy();
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins && hfid.depth() == 1) etaBinEnergies1trkL[ibin-1] += hfrh.energy();
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins && hfid.depth() != 1) etaBinEnergies1trkS[ibin-1] += hfrh.energy(); 
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins && hfrh.energy() > 4.0) etaBinEnergies1trk4[ibin-1] += hfrh.energy();
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergiesBX[ibin-1] += hfrh.energy();
-       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergiesNSD[ibin-1] += hfrh.energy();
-       if (_ShowDebug) edm::LogVerbatim("HFRecHits") << " hfid: " << hfid << " eta: " << eta << " ibin: " << ibin << " energy: " << hfrh.energy() << std::endl;     
+      const HFRecHit & hfrh = (*hfrechits)[i1];
+      HcalDetId hfid = hfrh.id();
+      //std::cout << hfid << std::endl;
+      //hfShortThreshold_ && hit.id().depth() != 1
+      //hfLongThreshold_ && hit.id().depth() == 1
+      double eta = geo->getPosition(hfid).eta();
+      if (fabs(eta) < 4.0) {
+	runningSampleEnergySum_[0] += hfrh.energy(); 
+	(runningSamplesNo_[0])++;
+	runningSampleEnergySum_[2] += hfrh.energy()/cosh(eta);
+	(runningSamplesNo_[2])++;
+      }
+      if (fabs(eta) > 4.0) {
+	runningSampleEnergySum_[1] += hfrh.energy(); 
+	(runningSamplesNo_[1])++;
+	runningSampleEnergySum_[3] += hfrh.energy()/cosh(eta);
+	(runningSamplesNo_[3])++;
+      }
+      if (eta > 0.0) {
+	hfpE += hfrh.energy();
+	if (hfrh.energy() > 4.0) hfpNo4++;
+      } else {
+	hfmE += hfrh.energy();
+	if (hfrh.energy() > 4.0) hfmNo4++;
+      }
+      const uint ibin = energy_vs_eta_reco_->FindBin( eta ); 
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergies[ibin-1] += hfrh.energy();
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEts[ibin-1] += hfrh.energy()/cosh(eta); 
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergies1trk[ibin-1] += hfrh.energy();
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins && hfid.depth() == 1) etaBinEnergies1trkL[ibin-1] += hfrh.energy();
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins && hfid.depth() != 1) etaBinEnergies1trkS[ibin-1] += hfrh.energy(); 
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins && hfrh.energy() > 4.0) etaBinEnergies1trk4[ibin-1] += hfrh.energy();
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergiesBX[ibin-1] += hfrh.energy();
+      if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergiesNSD[ibin-1] += hfrh.energy();
+      if (_ShowDebug) edm::LogVerbatim("HFRecHits") << " hfid: " << hfid << " eta: " << eta << " ibin: " << ibin << " energy: " << hfrh.energy() << std::endl;     
     }
   }
 
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies_[ibin]->Fill(etaBinEnergies[ibin]);
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEts_[ibin]->Fill(etaBinEts[ibin]);
   if (isOneTrack) {
-     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trk_[ibin]->Fill(etaBinEnergies1trk[ibin]);
-     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trkL_[ibin]->Fill(etaBinEnergies1trkL[ibin]);
-     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trkS_[ibin]->Fill(etaBinEnergies1trkS[ibin]);
-     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trk4_[ibin]->Fill(etaBinEnergies1trk4[ibin]);
+    for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trk_[ibin]->Fill(etaBinEnergies1trk[ibin]);
+    for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trkL_[ibin]->Fill(etaBinEnergies1trkL[ibin]);
+    for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trkS_[ibin]->Fill(etaBinEnergies1trkS[ibin]);
+    for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergies1trk4_[ibin]->Fill(etaBinEnergies1trk4[ibin]);
   }
   if ( 
       bx == 66 ||
@@ -834,13 +846,13 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       bx == 2748 ||
       bx == 2855 ||
       bx == 2934
-     ) {
-     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergiesBX_[ibin]->Fill(etaBinEnergiesBX[ibin]);
-     cas_etotbx_->Fill(energyCastor);
-     cas_etot1114bx_->Fill(energyCastor1114);
+       ) {
+    for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergiesBX_[ibin]->Fill(etaBinEnergiesBX[ibin]);
+    cas_etotbx_->Fill(energyCastor);
+    cas_etot1114bx_->Fill(energyCastor1114);
   }
   if (hfpNo4 > 0 && hfmNo4 > 0) {
-     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergiesNSD_[ibin]->Fill(etaBinEnergiesNSD[ibin]);
+    for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergiesNSD_[ibin]->Fill(etaBinEnergiesNSD[ibin]);
   }
 
   // *********************************     HF Towers   ****************************
@@ -854,19 +866,19 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   std::vector<double> etaBinTowEts(ForwardRecord::nbEtaBins,0.0); 
   if (towers) {
     for(unsigned int i = 0; i < towers->size(); ++i){
-       const CaloTower & hit= (*towers)[i];
-       if((hit.ieta() > 29 || hit.ieta() < -29) && hit.energy() > 3.0) { //in HF and above thresholds
-         if(fabs(hit.eta())<4.0) {
-           runningSampleEnergySum_[4] += hit.et();
-           (runningSamplesNo_[4])++;
-         }
-         if(fabs(hit.eta())>4.0) {
-           runningSampleEnergySum_[5] += hit.et();
-           (runningSamplesNo_[5])++;
-         }
-         const uint ibin = energy_vs_eta_reco_->FindBin( hit.eta() );     
-         if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinTowEts[ibin-1] += hit.et();
-       }
+      const CaloTower & hit= (*towers)[i];
+      if((hit.ieta() > 29 || hit.ieta() < -29) && hit.energy() > 3.0) { //in HF and above thresholds
+	if(fabs(hit.eta())<4.0) {
+	  runningSampleEnergySum_[4] += hit.et();
+	  (runningSamplesNo_[4])++;
+	}
+	if(fabs(hit.eta())>4.0) {
+	  runningSampleEnergySum_[5] += hit.et();
+	  (runningSamplesNo_[5])++;
+	}
+	const uint ibin = energy_vs_eta_reco_->FindBin( hit.eta() );     
+	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinTowEts[ibin-1] += hit.et();
+      }
     }
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinTowEts_[ibin]->Fill(etaBinTowEts[ibin]);
@@ -881,62 +893,66 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
   std::vector<double> etaBinPFEts(ForwardRecord::nbEtaBins,0.0);
   if (pfCandidateColl) {
-	for(unsigned icand=0;icand<pfCandidateColl->size(); icand++) {
-		const reco::PFCandidate pfCandidate = pfCandidateColl->at(icand);
-		//pfCandidate.pt();//pfCandidate.particleId();//pfCandidate.eta();//pfCandidate.phi();
-	   double et = pfCandidate.pt();
-	   double eta = pfCandidate.eta();
-	   double energy = et*cosh(eta);		
-       	   int id = pfCandidate.particleId();
-	   bool add_particle = false;
-           //X=0,           // undefined
-           //h=1,           // charged hadron
-           //e=2,           // electron 
-           //mu=3,          // muon 
-           //gamma=4,       // photon
-           //h0=5,          // neutral hadron
-           //h_HF=6,        // HF tower identified as a hadron
-           //egamma_HF=7    // HF tower identified as an EM particle		
-	   if(id != 4 && id != 5 && id != 6 && id != 7) add_particle = true;
-           if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
-           if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
-           if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
-           if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
-           if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
-           if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;		
-           if(add_particle) {
-		  const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
-		  if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += et;
-	   }	
-	}
+    for(unsigned icand=0;icand<pfCandidateColl->size(); icand++) {
+      const reco::PFCandidate pfCandidate = pfCandidateColl->at(icand);
+      //pfCandidate.pt();//pfCandidate.particleId();//pfCandidate.eta();//pfCandidate.phi();
+      double et = pfCandidate.pt();
+      double eta = pfCandidate.eta();
+      double energy = et*cosh(eta);		
+      int id = pfCandidate.particleId();
+      bool add_particle = false;
+      //X=0,           // undefined
+      //h=1,           // charged hadron
+      //e=2,           // electron 
+      //mu=3,          // muon 
+      //gamma=4,       // photon
+      //h0=5,          // neutral hadron
+      //h_HF=6,        // HF tower identified as a hadron
+      //egamma_HF=7    // HF tower identified as an EM particle		
+      if(id != 4 && id != 5 && id != 6 && id != 7) add_particle = true;
+      if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
+      if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
+      if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
+      if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
+      if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
+      if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;		
+      if(add_particle) {
+	const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
+	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += et;
+      }	
+    }
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinPFEts_[ibin]->Fill(etaBinPFEts[ibin]);
   
   // ************************ GenParticles ****************************
   
   if(!isData){
-      edm::Handle<reco::GenParticleCollection> genParticles;
-      try { iEvent.getByLabel("hiGenParticles",genParticles); }
-      catch (...) { edm::LogWarning(" GenPart ") << "No GenParticles found!" << std::endl; }
+    edm::Handle<reco::GenParticleCollection> genParticles;
+    try { iEvent.getByLabel("hiGenParticles",genParticles); } //
+    catch (...) { edm::LogWarning(" GenPart ") << "No GenParticles found!" << std::endl; }
       
-      const reco::GenParticleCollection* genColl= genParticles.failedToGet()? 0 : &(*genParticles);
+    const reco::GenParticleCollection* genColl= genParticles.failedToGet()? 0 : &(*genParticles);
       
-      if (genColl) {
-         for(unsigned igen=0;igen<genColl->size(); igen++) {
-			 const reco::GenParticle gen = genColl->at(igen);
-			 int status = gen.status();
-			 int id = gen.pdgId();			 
-             if (status != 1) continue;
-             if (abs(id) == 12 || //muon + neutrinos //muons in case of particle flow???
-                 abs(id) == 14 ||
-                 abs(id) == 16 ||
-                 abs(id) == 13) continue;
-             double energy = gen.energy();
-             double pt = gen.pt();
-             double eta = gen.eta();
-             //double rap = ;		  
-	     }
-	  }
+    std::vector<double> etaBinGenEts(ForwardRecord::nbEtaBins,0.0);
+    if (genColl) {
+      for(unsigned igen=0;igen<genColl->size(); igen++) {
+	const reco::GenParticle gen = genColl->at(igen);
+	int status = gen.status();
+	int id = gen.pdgId();			 
+	if (status != 1) continue;
+	if (abs(id) == 12 || //muon + neutrinos //muons in case of particle flow???
+	    abs(id) == 14 ||
+	    abs(id) == 16 ||
+	    abs(id) == 13) continue;
+	//double energy = gen.energy();
+	double et = gen.pt();
+	double eta = gen.eta();
+	//double rap = 0.5*ln((energy()+pz())/(energy()-pz()));//charge(); px();py();pz();mass();et();
+	const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
+	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinGenEts[ibin-1] += et;             
+      }
+    }
+    for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinGenEts_[ibin]->Fill(etaBinGenEts[ibin]);
   }
 
 
@@ -955,21 +971,21 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //python config selection: !isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2
   if ( vertices->size() > 0 ) {
-     vtxNo = vertices->size();
-     for (unsigned int i=0; i<vertices->size(); i++) if(vertices->at(i).isFake()) vtxNofake++;
-     if (!vertices->at(0).isFake()) {
-        const reco::Vertex&  pv = vertices->at(0);
-        //double ndof = pv.normalizedChi2();
-        //double zpos = fabs(pv.z());
-        //double rho = sqrt(pv.x()*pv.x()+pv.y()*pv.y()); 
-        //if(ndof > 4.0 && zpos <= 24.0 && rho <= 2.0) vtxNo++;
-        //if(i==0 && ndof > 4.0 && rho <= 2.0) 
-        vtxZ = pv.z();
-        vtxY = pv.y();
-        vtxX = pv.x();
-        //if(i==0 && ndof > 4.0 && rho <= 2.0 && zpos <= 24.0) 
-        vtxTrkNo = pv.tracksSize();
-     }
+    vtxNo = vertices->size();
+    for (unsigned int i=0; i<vertices->size(); i++) if(vertices->at(i).isFake()) vtxNofake++;
+    if (!vertices->at(0).isFake()) {
+      const reco::Vertex&  pv = vertices->at(0);
+      //double ndof = pv.normalizedChi2();
+      //double zpos = fabs(pv.z());
+      //double rho = sqrt(pv.x()*pv.x()+pv.y()*pv.y()); 
+      //if(ndof > 4.0 && zpos <= 24.0 && rho <= 2.0) vtxNo++;
+      //if(i==0 && ndof > 4.0 && rho <= 2.0) 
+      vtxZ = pv.z();
+      vtxY = pv.y();
+      vtxX = pv.x();
+      //if(i==0 && ndof > 4.0 && rho <= 2.0 && zpos <= 24.0) 
+      vtxTrkNo = pv.tracksSize();
+    }
   }
 
   // ******************************
@@ -1005,26 +1021,27 @@ RHAnalyser::endJob()
 
   if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << " Reached endJob ! " << std::endl;
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) {
-     double width = fabs(ForwardRecord::Eta_Bin_Edges[ibin+1]-ForwardRecord::Eta_Bin_Edges[ibin]);
-     if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << "MEAN-e: " << etaBinEnergies_[ibin]->GetMean(1) << "MEAN-et: " << etaBinEts_[ibin]->GetMean(1) << " Width: " << width << std::endl;
-     if(width > 1e-9) {
-       energy_vs_eta_reco_->Fill(ibin+1,etaBinEnergies_[ibin]->GetMean(1)/width);
-       //energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
-       et_vs_eta_reco_->Fill(ibin+1,etaBinEts_[ibin]->GetMean(1)/width);
-       //et_vs_eta_reco_->SetBinError(ibin+1,etaBinEts_[ibin]->GetMeanError(1)/width);       
-       towet_vs_eta_reco_->Fill(ibin+1,etaBinTowEts_[ibin]->GetMean(1)/width);
-       //towet_vs_eta_reco_->SetBinError(ibin+1,etaBinTowEts_[ibin]->GetMeanError(1)/width);   
-       pfet_vs_eta_reco_->Fill(ibin+1,etaBinPFEts_[ibin]->GetMean(1)/width);
-       //pfet_vs_eta_reco_->SetBinError(ibin+1,etaBinPFEts_[ibin]->GetMeanError(1)/width);   
-     }
-     //if(width > 1e-9) energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetRMS(1)/width);
+    double width = fabs(ForwardRecord::Eta_Bin_Edges[ibin+1]-ForwardRecord::Eta_Bin_Edges[ibin]);
+    if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << "MEAN-e: " << etaBinEnergies_[ibin]->GetMean(1) << "MEAN-et: " << etaBinEts_[ibin]->GetMean(1) << " Width: " << width << std::endl;
+    if(width > 1e-9) {
+      energy_vs_eta_reco_->Fill(ibin+1,etaBinEnergies_[ibin]->GetMean(1)/width);
+      //energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
+      et_vs_eta_reco_->Fill(ibin+1,etaBinEts_[ibin]->GetMean(1)/width);
+      //et_vs_eta_reco_->SetBinError(ibin+1,etaBinEts_[ibin]->GetMeanError(1)/width);       
+      towet_vs_eta_reco_->Fill(ibin+1,etaBinTowEts_[ibin]->GetMean(1)/width);
+      //towet_vs_eta_reco_->SetBinError(ibin+1,etaBinTowEts_[ibin]->GetMeanError(1)/width);   
+      pfet_vs_eta_reco_->Fill(ibin+1,etaBinPFEts_[ibin]->GetMean(1)/width);
+      //pfet_vs_eta_reco_->SetBinError(ibin+1,etaBinPFEts_[ibin]->GetMeanError(1)/width);   
+      genet_vs_eta_reco_->Fill(ibin+1,etaBinGenEts_[ibin]->GetMean(1)/width);
+    }
+    //if(width > 1e-9) energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetRMS(1)/width);
   }
   for(int i1 = 0; i1 < 6; i1++) {
-     /*hf_resp_->SetBinContent(i1+1, //do not do the division here: will merge many files later
-                                  runningSampleEnergySum_[i1] / static_cast<double>(runningSamplesNo_[i1])
-                                 );*/
-     hf_resp_accum_->SetBinContent(i1+1, runningSampleEnergySum_[i1] );   
-     hf_resp_occup_accum_->SetBinContent(i1+1, static_cast<double>(runningSamplesNo_[i1]) ); 
+    /*hf_resp_->SetBinContent(i1+1, //do not do the division here: will merge many files later
+      runningSampleEnergySum_[i1] / static_cast<double>(runningSamplesNo_[i1])
+      );*/
+    hf_resp_accum_->SetBinContent(i1+1, runningSampleEnergySum_[i1] );   
+    hf_resp_occup_accum_->SetBinContent(i1+1, static_cast<double>(runningSamplesNo_[i1]) ); 
   }
 
 }
