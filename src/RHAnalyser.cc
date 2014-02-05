@@ -20,11 +20,15 @@
 /***************************/
 //Also check the label of genParticles//
 /**********!!!**************/
+// 2011 pp-data
 // #define OLD_428_DATA 
+// 2011 PbPb-data
+// #define OLD_44X_DATA
+// for now just a switch to enable saturation in the recent SW (can be data or MC)
+// #define NEW_53X
 #define THIS_IS_MC
 /**********!!!**************/
 /**************************/
-
 
 // system include files
 #include <memory>
@@ -133,6 +137,7 @@ namespace ForwardRecord {
 
 namespace castor {
 
+  //E-map swap: s5m10<->s5m12, s6m10<->s6m12, s7m10<->s7m12
   //using for Katerina's value's (some correction values seem too big (for me big is all >3), some are zeros)
   const bool channelQuality[ForwardRecord::CSectors][ForwardRecord::CModules] =             // sector
     //mod 1   2     3     4     5      6    7     8     9    10     11    12   13    14
@@ -140,8 +145,8 @@ namespace castor {
      {true ,true ,true ,true ,true ,true ,false,true ,true ,true ,true ,true ,true ,true }, // 2
      {true ,true ,true ,true ,true ,true ,false,false,false,true ,false,true ,true ,true }, // 3 //s3m9 ? 
      {true ,true ,true ,true ,true ,true ,false,false,false,true ,false,true ,false,true }, // 4
-     {true ,false,true ,true ,true ,true ,false,false,false,true ,true ,true ,true ,true }, // 5
-     {true ,true ,true ,true ,true ,true ,false,false,false,true ,true ,true ,true ,true }, // 6 //s6m9 ?
+     {true ,false,true ,true ,true ,true ,false,false,false,false,true ,false,true ,true }, // 5
+     {true ,true ,true ,true ,true ,true ,false,false,false,false,true ,false,true ,true }, // 6 //s6m9 ?
      {true ,true ,true ,true ,true ,true ,false,true ,true ,false,false,false,false,false}, // 7 //s7m10-14katerina?
      {true ,true ,true ,true ,true ,true ,false,false,true ,false,false,false,false,false}, // 8 //s8m10-14katerina?
      {true ,true ,true ,true ,true ,true ,false,true ,true ,true ,true ,true ,false,true }, // 9 //s9m13?
@@ -190,6 +195,48 @@ namespace castor {
      {     0.5000 ,    0.5000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000  },
      {     0.5000 ,    0.5000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000  },
      {     0.5000 ,    0.5000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000  }};
+#elif defined OLD_44X_DATA
+//for the next two tables you have problems with swapped channels in the e-map: tables assume corrected e-map, so get rid of the channels in the bad channel list above:
+// s5m10<->s5m12, s6m10<->s6m12, s7m10<->s7m12
+//for runs >=181530 && <=181603 
+  const double channelFullCalibrationHI1[ForwardRecord::CSectors][ForwardRecord::CModules] =
+//       mod1            2            3            4            5            6            7            8            9           10           11           12           13           14
+{{     0.18495,     0.11952,     0.37649,     0.14166,     0.25474,     0.46429,     0.39233,     0.22713,     0.10552,     0.11956,     0.09858,     0.11220,     0.09621,     0.14243}, // s 1
+ {     0.10485,     0.13385,     0.31328,     0.38071,     0.21649,     0.52951,     0.28841,     0.39027,     0.12423,     0.18388,     0.12229,     0.12109,     0.09886,     0.17016}, // s 2
+ {     0.22034,     0.12004,     0.33844,     0.11442,     0.48180,     1.20719,     0.00000,     0.00000,     0.18567,     0.09967,     0.09804,     0.11879,     0.07494,     0.18650}, // s 3
+ {     0.18419,     0.04722,     0.18544,     0.12960,     0.23316,     0.65600,     0.73333,     0.00000,     0.00000,     0.13856,     0.08191,     0.14840,     0.09660,     0.17110}, // s 4
+ {     0.18037,     0.19413,     0.25994,     0.11838,     0.12625,     0.09974,     0.45542,    -0.00000,     0.00000,     0.00456,     0.03951,     0.14642,     0.02530,     0.05922}, // s 5
+ {     0.16242,     0.14450,     0.25352,     0.12882,     0.14926,     0.14460,     0.00000,    -0.00000,     0.03382,     0.06135,     0.03623,     0.01288,     0.02831,     0.06928}, // s 6
+ {     0.15914,     0.18249,     0.09443,     0.16489,     0.14572,     0.03201,    -0.00000,     0.31665,     0.03391,     0.00000,     0.04154,     0.01179,     0.02974,     0.06963}, // s 7
+ {     0.13352,     0.09071,     0.15396,     0.11714,     0.21436,     0.02758,     0.00000,     0.25105,     0.02596,     0.03165,     0.04870,     0.03363,     0.04201,     0.06358}, // s 8
+ {     0.13137,     0.12946,     0.20657,     0.15690,     0.83175,     0.03946,     0.00000,     0.33162,     0.08513,     0.12195,     0.19210,     0.12288,     0.14428,     0.10421}, // s 9
+ {     0.15101,     0.17270,     0.19651,     0.16710,     0.80184,     0.11002,     0.00000,     0.32877,     0.11603,     0.11513,     0.21953,     0.13693,     0.17226,     0.12786}, // s10
+ {     0.12553,     0.11964,     0.18151,     0.17484,     0.45408,     0.08196,     0.00000,     0.00000,     0.10772,     0.13814,     0.10941,     0.10977,     0.12545,     0.12008}, // s11
+ {     0.10688,     0.11094,     0.19901,     0.17168,     0.78103,     0.17369,     0.00000,     0.00000,     0.12530,     0.10031,     0.18125,     0.11565,     0.15497,     0.11406}, // s12
+ {     0.24803,     0.12523,     0.37815,     0.23653,     0.66186,     0.26966,     0.00000,     0.00000,     0.00000,     0.10463,     0.12428,     0.09990,     0.00000,     0.22826}, // s13
+ {     0.25662,     0.13909,     0.23652,     0.34411,     0.74027,     0.22282,     0.00000,    -0.00000,     0.11054,     0.12363,     0.07838,     0.10696,     0.12513,     0.19703}, // s14
+ {     0.18672,     0.18555,     0.10587,     0.28700,     0.41646,     0.32892,     0.00000,    -0.00000,     0.11059,     0.10379,     0.07880,     0.09307,     0.07529,     0.14927}, // s15
+ {     0.12822,     0.14803,     0.39631,     0.26655,     0.52847,     0.26153,     0.00000,     0.00000,     0.11174,     0.13799,     0.08952,     0.10944,     0.10081,     0.13628}};// s16
+ 
+//for runs >=181604 && <=183126
+const double channelFullCalibrationHI2[ForwardRecord::CSectors][ForwardRecord::CModules] =
+//       mod1            2            3            4            5            6            7            8            9           10           11           12           13           14
+{{     0.18612,     0.10041,     0.37486,     0.14133,     0.35172,     0.45087,     0.45185,     0.23070,     0.10587,     0.12015,     0.09898,     0.11312,     0.09582,     0.14146}, // s 1
+ {     0.10558,     0.11418,     0.31181,     0.37948,     0.29684,     0.50754,     0.26382,     0.39027,     0.12463,     0.18184,     0.12276,     0.12070,     0.09808,     0.17082}, // s 2
+ {     0.13348,     0.23710,     0.33720,     0.11479,     0.65876,     1.19037,     0.00000,     0.00000,     0.18567,     0.09959,     0.09725,     0.11940,     0.07485,     0.18480}, // s 3
+ {     0.11197,     0.09410,     0.18472,     0.13004,     0.32342,     0.64023,     0.79802,     0.00000,     0.00000,     0.13842,     0.08109,     0.14751,     0.09701,     0.17055}, // s 4
+ {     0.18037,     0.19315,     0.26181,     0.11838,     0.12443,     0.09550,     0.42714,    -0.00000,     0.00000,     0.00453,     0.03928,     0.14855,     0.02519,     0.05896}, // s 5
+ {     0.16242,     0.14371,     0.25176,     0.12882,     0.14858,     0.14341,     0.00000,     0.00000,     0.03441,     0.06172,     0.03642,     0.01288,     0.02819,     0.06895}, // s 6
+ {     0.15984,     0.18156,     0.09443,     0.16489,     0.14635,     0.03236,    -0.00000,     0.31709,     0.03423,     0.00000,     0.04186,     0.01183,     0.02967,     0.06978}, // s 7
+ {     0.13352,     0.09120,     0.15396,     0.11817,     0.21436,     0.02681,     0.00000,     0.25228,     0.02596,     0.03186,     0.04895,     0.03386,     0.04219,     0.06402}, // s 8
+ {     0.13137,     0.12946,     0.20821,     0.15740,     0.83508,     0.03929,     0.00000,     0.33018,     0.08482,     0.12195,     0.19326,     0.12375,     0.14428,     0.10421}, // s 9
+ {     0.15002,     0.17161,     0.19651,     0.16651,     0.80009,     0.10986,     0.00000,     0.32754,     0.11560,     0.11430,     0.21953,     0.13597,     0.17065,     0.12786}, // s10
+ {     0.12262,     0.11985,     0.18113,     0.17484,     0.45191,     0.08110,     0.00000,     0.00000,     0.10772,     0.13719,     0.10941,     0.10901,     0.12485,     0.12008}, // s11
+ {     0.10444,     0.11119,     0.19946,     0.17121,     0.77631,     0.17539,     0.00000,     0.00000,     0.12573,     0.10031,     0.18125,     0.11565,     0.15423,     0.11327}, // s12
+ {     0.24803,     0.12486,     0.37815,     0.23653,     0.65000,     0.26966,     0.00000,     0.00000,     0.00000,     0.10494,     0.12428,     0.09921,     0.00000,     0.22941}, // s13
+ {     0.25662,     0.13984,     0.23652,     0.34276,     0.73554,     0.21843,    -0.00000,     0.00000,     0.11054,     0.12353,     0.07846,     0.10611,     0.12425,     0.19604}, // s14
+ {     0.18672,     0.18755,     0.10629,     0.28618,     0.41646,     0.31653,     0.00000,    -0.00000,     0.11059,     0.10390,     0.07926,     0.09334,     0.07547,     0.15018}, // s15
+ {     0.12877,     0.14950,     0.39765,     0.26655,     0.53047,     0.25053,     0.00000,     0.00000,     0.11174,     0.13815,     0.08934,     0.10944,     0.10101,     0.13737}};// s16
 #else
   // Katerina's values using halo muon data (w/o TOTEM), already scaled by s9m4
   const double channelGainQE[ForwardRecord::CSectors][ForwardRecord::CModules] =                                                                                // sector
@@ -257,17 +304,17 @@ private:
     uint vtxNbfake;
     uint vtx1TrkNb;
     double vtx1Z;
+    double vtx1Zerr;
     double vtx1Y;
     double vtx1X;
 
-    /*
-    
-      int nbCasRecHits;
-      double casRecHitEnergy[224];
-      int    casRecHitIphi[224];
-      int    casRecHitIdepth[224];
-      int    casRecHitSaturation[224];
+    int nbCasRecHits;
+    double casRecHitEnergy[224];
+    int    casRecHitIphi[224];
+    int    casRecHitIdepth[224];
+    int    casRecHitSaturation[224];
 
+   /*
       int nbZDCRecHits;
       double zdcRecHitEnergy[18];
       int    zdcRecHitIside[18];
@@ -374,17 +421,17 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   rhtree_->Branch("vtxNbfake",&treeVariables_.vtxNbfake,"vtxNbfake/i");
   rhtree_->Branch("vtx1TrkNb",&treeVariables_.vtx1TrkNb,"vtx1TrkNb/i");
   rhtree_->Branch("vtx1Z",&treeVariables_.vtx1Z,"vtx1Z/D");
+  rhtree_->Branch("vtx1Zerr",&treeVariables_.vtx1Zerr,"vtx1Zerr/D");
   rhtree_->Branch("vtx1Y",&treeVariables_.vtx1Y,"vtx1Y/D");
   rhtree_->Branch("vtx1X",&treeVariables_.vtx1X,"vtx1X/D");
 
-  /*
- 
-    rhtree_->Branch("nbCasRecHits",&treeVariables_.nbCasRecHits,"nbCasRecHits/i");
-    rhtree_->Branch("casRecHitEnergy",treeVariables_.casRecHitEnergy,"casRecHitEnergy[nbCasRecHits]/D");
-    rhtree_->Branch("casRecHitIphi",treeVariables_.casRecHitIphi,"casRecHitIphi[nbCasRecHits]/I");
-    rhtree_->Branch("casRecHitIdepth",treeVariables_.casRecHitIdepth,"casRecHitIdepth[nbCasRecHits]/I");
-    rhtree_->Branch("casRecHitSaturation",treeVariables_.casRecHitSaturation,"casRecHitSaturation[nbCasRecHits]/I");
+  rhtree_->Branch("nbCasRecHits",&treeVariables_.nbCasRecHits,"nbCasRecHits/i");
+  rhtree_->Branch("casRecHitEnergy",treeVariables_.casRecHitEnergy,"casRecHitEnergy[nbCasRecHits]/D");
+  rhtree_->Branch("casRecHitIphi",treeVariables_.casRecHitIphi,"casRecHitIphi[nbCasRecHits]/I");
+  rhtree_->Branch("casRecHitIdepth",treeVariables_.casRecHitIdepth,"casRecHitIdepth[nbCasRecHits]/I");
+  rhtree_->Branch("casRecHitSaturation",treeVariables_.casRecHitSaturation,"casRecHitSaturation[nbCasRecHits]/I");
 
+  /*
     rhtree_->Branch("nbZDCRecHits",&treeVariables_.nbZDCRecHits,"nbZDCRecHits/i");
     rhtree_->Branch("zdcRecHitEnergy",treeVariables_.zdcRecHitEnergy,"zdcRecHitEnergy[nbZDCRecHits]/D");
     rhtree_->Branch("zdcRecHitIside",treeVariables_.zdcRecHitIside,"zdcRecHitIside[nbZDCRecHits]/I");
@@ -435,7 +482,7 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   for(unsigned int ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++){
     TH1D* theHisto = fs_->make<TH1D>(Form("energy_reco_%d",ibin),
 				     Form("Detector-level Energy in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-				     24000,-12000.0,12000.0);//2020,-136.50,13635.00);
+				     96000,-12000.0,36000.0);//2020,-136.50,13635.00);
     theHisto->Sumw2();
     theHisto->SetYTitle("Entries");
     theHisto->SetXTitle("Energy");
@@ -445,52 +492,52 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
     etaBinEnergies_.push_back(theHisto);
     TH1D* theHistoAlike = fs_->make<TH1D>(Form("et_reco_%d",ibin),
 					  Form("Detector-level Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-					  48000,-12000.0,12000.0);
+					  96000,-12000.0,36000.0);
     etaBinEts_.push_back(theHistoAlike);
     TH1D* theHistoAlike1 = fs_->make<TH1D>(Form("towet_reco_%d",ibin),
 					   Form("Detector-level tower Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-					   48000,-12000.0,12000.0);
+					   96000,-12000.0,36000.0);
     etaBinTowEts_.push_back(theHistoAlike1);
     TH1D* theHistoAlike2 = fs_->make<TH1D>(Form("pfet_reco_%d",ibin),
 					   Form("Detector-level PF Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-					   48000,-12000.0,12000.0);
+					   96000,-12000.0,36000.0);
     etaBinPFEts_.push_back(theHistoAlike2);    
     TH1D* theHistoAlike3 = fs_->make<TH1D>(Form("genet_reco_%d",ibin),
 					   Form("Particle-level Et in #eta %g:%g", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-					   48000,-12000.0,12000.0);
+					   96000,-12000.0,36000.0);
     etaBinGenEts_.push_back(theHistoAlike3);    
     TH1D* theHisto1 = fs_->make<TH1D>(Form("energy_reco_%d_1trk",ibin),
 				      Form("Detector-level Energy in #eta %g:%g (1trk)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-				      24000,-12000.0,12000.0);
+				      96000,-12000.0,36000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trk",ibin)); 
     theHisto1->Sumw2();
     etaBinEnergies1trk_.push_back(theHisto1);
     TH1D* theHisto2 = fs_->make<TH1D>(Form("energy_reco_%d_1trkL",ibin),
 				      Form("Detector-level Energy in #eta %g:%g (1trk&L)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-				      24000,-12000.0,12000.0);
+				      96000,-12000.0,36000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trkL",ibin));
     theHisto2->Sumw2();
     etaBinEnergies1trkL_.push_back(theHisto2);
     TH1D* theHisto3 = fs_->make<TH1D>(Form("energy_reco_%d_1trkS",ibin),
 				      Form("Detector-level Energy in #eta %g:%g (1trk&S)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-				      24000,-12000.0,12000.0);
+				      96000,-12000.0,36000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trkS",ibin));
     theHisto3->Sumw2();
     etaBinEnergies1trkS_.push_back(theHisto3);
     TH1D* theHisto4 = fs_->make<TH1D>(Form("energy_reco_%d_1trk4",ibin),
 				      Form("Detector-level Energy in #eta %g:%g (1trk&4)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-				      24000,-12000.0,12000.0);
+				      96000,-12000.0,36000.0);
     //(TH1D*)theHisto->Clone(Form("energy_reco_%d_1trk4",ibin));
     theHisto4->Sumw2();
     etaBinEnergies1trk4_.push_back(theHisto4);
     TH1D* theHisto5 = fs_->make<TH1D>(Form("energy_reco_%d_bx",ibin),
 				      Form("Detector-level Energy in #eta %g:%g (bx)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-				      24000,-12000.0,12000.0);
+				      96000,-12000.0,36000.0);
     theHisto5->Sumw2();
     etaBinEnergiesBX_.push_back(theHisto5);
     TH1D* theHisto6 = fs_->make<TH1D>(Form("energy_reco_%d_nsd",ibin),
 				      Form("Detector-level Energy in #eta %g:%g (NSD)", ForwardRecord::Eta_Bin_Edges[ibin],ForwardRecord::Eta_Bin_Edges[ibin+1]),
-				      24000,-12000.0,12000.0);
+				      96000,-12000.0,36000.0);
     theHisto6->Sumw2();
     etaBinEnergiesNSD_.push_back(theHisto6);
   }  
@@ -516,15 +563,15 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   track_pt_ = fs_->make<TH1D>("track_pt","High purity track p_{t}",220,-1.0,10.0);
   track_pt_->Sumw2();  
 
-  cas_etot_ = fs_->make<TH1D>("cas_etot","Total energy of Castor calibrated RecHits",3600,-6000.0,12000.0);
+  cas_etot_ = fs_->make<TH1D>("cas_etot","Total energy of Castor calibrated RecHits",96000,-12000.0,36000.0);
   cas_etot_->Sumw2();
-  cas_etot15_ = fs_->make<TH1D>("cas_etot15","Total energy of Castor calibrated RecHits in m1-5",3600,-6000.0,12000.0);
+  cas_etot15_ = fs_->make<TH1D>("cas_etot15","Total energy of Castor calibrated RecHits in m1-5",96000,-12000.0,36000.0);
   cas_etot15_->Sumw2();
-  cas_etot1114_ = fs_->make<TH1D>("cas_etot1114","Total energy of Castor calibrated RecHits in m11-14",3600,-6000.0,12000.0);
+  cas_etot1114_ = fs_->make<TH1D>("cas_etot1114","Total energy of Castor calibrated RecHits in m11-14",96000,-12000.0,36000.0);
   cas_etot1114_->Sumw2();
-  cas_etotbx_ = fs_->make<TH1D>("cas_etotbx","Total energy of Castor calibrated RecHits (selected BX)",3600,-6000.0,12000.0);
+  cas_etotbx_ = fs_->make<TH1D>("cas_etotbx","Total energy of Castor calibrated RecHits (selected BX)",96000,-12000.0,36000.0);
   cas_etotbx_->Sumw2();
-  cas_etot1114bx_ = fs_->make<TH1D>("cas_etot1114bx","Total energy of Castor calibrated RecHits in m11-14 (selected BX)",3600,-6000.0,12000.0);
+  cas_etot1114bx_ = fs_->make<TH1D>("cas_etot1114bx","Total energy of Castor calibrated RecHits in m11-14 (selected BX)",96000,-12000.0,36000.0);
   cas_etot1114bx_->Sumw2();
   cas_zprofile_ = fs_->make<TProfile>("cas_zprofile","Profile of Castor intercalibrated RecHit responses along z",14,0.5,14.5);
   cas_phiprofile_ = fs_->make<TProfile>("cas_phiprofile","Profile of Castor intercalibrated RecHit responses over #phi ",16,0.5,16.5);
@@ -588,7 +635,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   double energyCastor = 0;
   double energyCastor15 = 0;
   double energyCastor1114 = 0;
-  //treeVariables_.nbCasRecHits = 0; 
+  treeVariables_.nbCasRecHits = 0; 
   std::vector<double> sectorEnergyCastor(16,0.0);
   std::vector<double> sectorEnergyCastor15(16,0.0);
   std::vector<double> sectorEnergyCastor1114(16,0.0);
@@ -608,6 +655,9 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if(isData) {
 #ifdef OLD_428_DATA
           corrFactor = castor::channelIntercalibCorr[sec-1][mod-1] * castor::channelEMCorr[sec-1][mod-1] * ForwardRecord::absCasEscaleFactor;
+#elif defined OLD_44X_DATA
+	  if( iEvent.id().run()>=181530 && iEvent.id().run()<=181603) corrFactor = castor::channelFullCalibrationHI1[sec-1][mod-1];
+          if( iEvent.id().run()>=181604 && iEvent.id().run()<=183126) corrFactor = castor::channelFullCalibrationHI2[sec-1][mod-1];           
 #else
           corrFactor = castor::channelGainQE[sec-1][mod-1] * ForwardRecord::absCasEscaleFactor;
 #endif
@@ -621,13 +671,17 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if(mod>10 && mod<15) energyCastor1114 += corrFactor * rh.energy();
         cas_chprofile_->Fill(static_cast<double>(ich),corrFactor * rh.energy());
       }
-      /*if (nhits  < 224) {
+      if (nhits  < 224) {
         treeVariables_.nbCasRecHits = nhits + 1 ;
-	treeVariables_.casRecHitEnergy[nhits] = rh.energy();
+	treeVariables_.casRecHitEnergy[nhits] = corrFactor * rh.energy();
 	treeVariables_.casRecHitIphi[nhits] = castorid.sector();
 	treeVariables_.casRecHitIdepth[nhits] = castorid.module();
+#ifdef NEW_53X
         treeVariables_.casRecHitSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
-	}*/
+#else
+        treeVariables_.casRecHitSaturation[nhits] = -1;
+#endif
+      }
       nhits++;
     } // end loop castor rechits
     if (_ShowDebug && casrechits->size() > 0) edm::LogVerbatim(" CastorRecHits ") << " Castor energy: " << energyCastor << std::endl;
@@ -886,7 +940,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // ************************ PF Candidates   ****************************
   
   edm::Handle<reco::PFCandidateCollection> pfCandidates_h;
-  try{ iEvent.getByLabel("particleFlow",pfCandidates_h); }
+  try{ iEvent.getByLabel("particleFlow",pfCandidates_h); } //NO particle flow for PbPb !!!
   catch(...) { edm::LogWarning("PFCands ") << " Cannot get PFCands " << std::endl; }
   
   const reco::PFCandidateCollection *pfCandidateColl = pfCandidates_h.failedToGet()? 0 : &(*pfCandidates_h);
@@ -928,7 +982,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   if(!isData){
     edm::Handle<reco::GenParticleCollection> genParticles;
-    try { iEvent.getByLabel("hiGenParticles",genParticles); } //
+    try { iEvent.getByLabel("hiGenParticles",genParticles); } //hiGenParticles
     catch (...) { edm::LogWarning(" GenPart ") << "No GenParticles found!" << std::endl; }
       
     const reco::GenParticleCollection* genColl= genParticles.failedToGet()? 0 : &(*genParticles);
@@ -962,6 +1016,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   uint vtxNofake = 0;
   uint vtxTrkNo = 0;
   double vtxZ = 0.0;
+  double vtxZerr = 0.0;
   double vtxY = 0.0;
   double vtxX = 0.0;
   edm::Handle<reco::VertexCollection> vertices;
@@ -981,6 +1036,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //if(ndof > 4.0 && zpos <= 24.0 && rho <= 2.0) vtxNo++;
       //if(i==0 && ndof > 4.0 && rho <= 2.0) 
       vtxZ = pv.z();
+      vtxZerr = pv.zError();
       vtxY = pv.y();
       vtxX = pv.x();
       //if(i==0 && ndof > 4.0 && rho <= 2.0 && zpos <= 24.0) 
@@ -1000,6 +1056,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   treeVariables_.vtxNbfake= vtxNofake;
   treeVariables_.vtx1TrkNb= vtxTrkNo;
   treeVariables_.vtx1Z    = vtxZ;
+  treeVariables_.vtx1Zerr    = vtxZerr;
   treeVariables_.vtx1Y    = vtxY;
   treeVariables_.vtx1X    = vtxX;
 
@@ -1022,17 +1079,18 @@ RHAnalyser::endJob()
   if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << " Reached endJob ! " << std::endl;
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) {
     double width = fabs(ForwardRecord::Eta_Bin_Edges[ibin+1]-ForwardRecord::Eta_Bin_Edges[ibin]);
+    double bincenter = (ForwardRecord::Eta_Bin_Edges[ibin+1]+ForwardRecord::Eta_Bin_Edges[ibin])/2.0;
     if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << "MEAN-e: " << etaBinEnergies_[ibin]->GetMean(1) << "MEAN-et: " << etaBinEts_[ibin]->GetMean(1) << " Width: " << width << std::endl;
     if(width > 1e-9) {
-      energy_vs_eta_reco_->Fill(ibin+1,etaBinEnergies_[ibin]->GetMean(1)/width);
+      energy_vs_eta_reco_->Fill(bincenter,etaBinEnergies_[ibin]->GetMean(1)/width);
       //energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
-      et_vs_eta_reco_->Fill(ibin+1,etaBinEts_[ibin]->GetMean(1)/width);
+      et_vs_eta_reco_->Fill(bincenter,etaBinEts_[ibin]->GetMean(1)/width);
       //et_vs_eta_reco_->SetBinError(ibin+1,etaBinEts_[ibin]->GetMeanError(1)/width);       
-      towet_vs_eta_reco_->Fill(ibin+1,etaBinTowEts_[ibin]->GetMean(1)/width);
+      towet_vs_eta_reco_->Fill(bincenter,etaBinTowEts_[ibin]->GetMean(1)/width);
       //towet_vs_eta_reco_->SetBinError(ibin+1,etaBinTowEts_[ibin]->GetMeanError(1)/width);   
-      pfet_vs_eta_reco_->Fill(ibin+1,etaBinPFEts_[ibin]->GetMean(1)/width);
+      pfet_vs_eta_reco_->Fill(bincenter,etaBinPFEts_[ibin]->GetMean(1)/width);
       //pfet_vs_eta_reco_->SetBinError(ibin+1,etaBinPFEts_[ibin]->GetMeanError(1)/width);   
-      genet_vs_eta_reco_->Fill(ibin+1,etaBinGenEts_[ibin]->GetMean(1)/width);
+      genet_vs_eta_reco_->Fill(bincenter,etaBinGenEts_[ibin]->GetMean(1)/width);
     }
     //if(width > 1e-9) energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetRMS(1)/width);
   }
