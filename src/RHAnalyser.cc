@@ -18,15 +18,16 @@
 //
 
 /***************************/
-//Also check the label of genParticles//
 /**********!!!**************/
 // 2011 pp-data
 // #define OLD_428_DATA 
 // 2011 PbPb-data
 // #define OLD_44X_DATA
-// for now just a switch to enable saturation in the recent SW (can be data or MC)
-// #define NEW_53X
-#define THIS_IS_MC
+// Any kind of calibrated DATA
+#define CALIBRATED_DATA 
+// for now just a switch to enable checks of saturation flag in the recent SW (can be data or MC)
+#define NEW_53X
+//#define THIS_IS_MC
 /**********!!!**************/
 /**************************/
 
@@ -313,6 +314,7 @@ private:
     int    casRecHitIphi[224];
     int    casRecHitIdepth[224];
     int    casRecHitSaturation[224];
+    int    casRecHitReSaturation[224];
 
    /*
       int nbZDCRecHits;
@@ -341,6 +343,8 @@ private:
   bool _ShowDebug;
   edm::InputTag _VtxSrc;
   edm::InputTag _TrkSrc;
+  edm::InputTag _GenPartSrc;
+  edm::InputTag _PFSrc;
 
   TTree* rhtree_;
 
@@ -349,6 +353,8 @@ private:
   TProfile* energy_vs_eta_reco_;
   TProfile* et_vs_eta_reco_;
   TProfile* towet_vs_eta_reco_;
+  TH2D* tow_ene_map_;
+  TH2D* tow_occup_map_;
   TProfile* pfet_vs_eta_reco_;
   TProfile* genet_vs_eta_reco_;
   std::vector<TH1D*> etaBinEnergies_;
@@ -379,6 +385,15 @@ private:
   TProfile* cas_phiprofile1114_;
   TProfile* cas_chprofile_;
 
+  TH1D* zdc_chno_satflg_;
+  TH1D* zdcm_etot_;
+  TH1D* zdcp_etot_;
+  TH2D* zdcm_em_vs_tot_;
+  TH2D* zdcp_em_vs_tot_;
+  TH2D* trkno_vs_hfme_;
+  TH2D* hfme_vs_case_;
+  TH2D* case_vs_zdcme_;
+
 };
 
 //
@@ -398,6 +413,10 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   //pp: "offlinePrimaryVertices"//HI: "hiSelectedVertex"
   _TrkSrc ( iConfig.getUntrackedParameter<edm::InputTag>("trkSrc",edm::InputTag("generalTracks")) ),
   //pp: "generalTracks" //OldHI44X: "hiSelectedTracks" //NewHI53X: "hiGeneralTracks"
+  _GenPartSrc ( iConfig.getUntrackedParameter<edm::InputTag>("genPartSrc",edm::InputTag("genParticles")) ),
+  //pp && pPb: "genParticles" //HI: "hiGenParticles"
+  _PFSrc ( iConfig.getUntrackedParameter<edm::InputTag>("pfSrc",edm::InputTag("particleFlow")) ),
+  //pp && pPb: "particleFlow" //HI: "particleFlowTmp"
   runningSampleEnergySum_(6,0.0),
   runningSamplesNo_(6,0) 
 {
@@ -430,6 +449,7 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   rhtree_->Branch("casRecHitIphi",treeVariables_.casRecHitIphi,"casRecHitIphi[nbCasRecHits]/I");
   rhtree_->Branch("casRecHitIdepth",treeVariables_.casRecHitIdepth,"casRecHitIdepth[nbCasRecHits]/I");
   rhtree_->Branch("casRecHitSaturation",treeVariables_.casRecHitSaturation,"casRecHitSaturation[nbCasRecHits]/I");
+  rhtree_->Branch("casRecHitReSaturation",treeVariables_.casRecHitReSaturation,"casRecHitReSaturation[nbCasRecHits]/I");
 
   /*
     rhtree_->Branch("nbZDCRecHits",&treeVariables_.nbZDCRecHits,"nbZDCRecHits/i");
@@ -461,6 +481,12 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   towet_vs_eta_reco_->Sumw2();
   towet_vs_eta_reco_->SetXTitle("#eta");
   towet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");
+  tow_ene_map_ = fs_->make<TH2D>("tow_ene_map","ieta-iphi map of tower energies",199,-99.5,99.5,100,-0.5,99.5);
+  tow_ene_map_->SetXTitle("i#eta");
+  tow_ene_map_->SetYTitle("i#phi");
+  tow_occup_map_=fs_->make<TH2D>("tow_occup_map","Number of towers above threshold as an ieta-iphi map",199,-99.5,99.5,100,-0.5,99.5);
+  tow_occup_map_->SetXTitle("i#eta");
+  tow_occup_map_->SetYTitle("i#phi");
   pfet_vs_eta_reco_ = fs_->make<TProfile>("pfet_vs_eta_reco","Detector-level PF <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
   pfet_vs_eta_reco_->Sumw2();
   pfet_vs_eta_reco_->SetXTitle("#eta");
@@ -541,6 +567,7 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
     theHisto6->Sumw2();
     etaBinEnergiesNSD_.push_back(theHisto6);
   }  
+
   hf_resp_accum_ = fs_->make<TH1D>("hf_resp_accum","HF sum of responses", 6 , 0.5, 6.5); //
   hf_resp_accum_->Sumw2();
   hf_resp_accum_->GetXaxis()->SetBinLabel(1,"RHe34");
@@ -562,22 +589,58 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   //high quality track pt histo!!!
   track_pt_ = fs_->make<TH1D>("track_pt","High purity track p_{t}",220,-1.0,10.0);
   track_pt_->Sumw2();  
+  track_pt_->SetXTitle("p_{t} (GeV)");
 
-  cas_etot_ = fs_->make<TH1D>("cas_etot","Total energy of Castor calibrated RecHits",96000,-12000.0,36000.0);
+  cas_etot_ = fs_->make<TH1D>("cas_etot","Total energy of Castor calibrated RecHits",168000,-12000.0,72000.0);//96000,-12000.0,36000.0);
   cas_etot_->Sumw2();
+  cas_etot_->SetXTitle("E_{tot} (GeV)");
   cas_etot15_ = fs_->make<TH1D>("cas_etot15","Total energy of Castor calibrated RecHits in m1-5",96000,-12000.0,36000.0);
   cas_etot15_->Sumw2();
+  cas_etot15_->SetXTitle("E_{m1-5} (GeV)");
   cas_etot1114_ = fs_->make<TH1D>("cas_etot1114","Total energy of Castor calibrated RecHits in m11-14",96000,-12000.0,36000.0);
   cas_etot1114_->Sumw2();
+  cas_etot1114_->SetXTitle("E_{m11-14} (GeV)");
   cas_etotbx_ = fs_->make<TH1D>("cas_etotbx","Total energy of Castor calibrated RecHits (selected BX)",96000,-12000.0,36000.0);
   cas_etotbx_->Sumw2();
+  cas_etotbx_->SetXTitle("E_{tot} (GeV)");
   cas_etot1114bx_ = fs_->make<TH1D>("cas_etot1114bx","Total energy of Castor calibrated RecHits in m11-14 (selected BX)",96000,-12000.0,36000.0);
   cas_etot1114bx_->Sumw2();
+  cas_etot1114bx_->SetXTitle("E_{m11-14} (GeV)");
   cas_zprofile_ = fs_->make<TProfile>("cas_zprofile","Profile of Castor intercalibrated RecHit responses along z",14,0.5,14.5);
+  cas_zprofile_->SetXTitle("Longitudinal module number");
   cas_phiprofile_ = fs_->make<TProfile>("cas_phiprofile","Profile of Castor intercalibrated RecHit responses over #phi ",16,0.5,16.5);
+  cas_phiprofile_->SetXTitle("Azimuthal sector number");
   cas_phiprofile15_ = fs_->make<TProfile>("cas_phiprofile15","Profile of Castor intercalibrated RecHit responses over #phi in m1-5",16,0.5,16.5);
+  cas_phiprofile15_->SetXTitle("Azimuthal sector number");
   cas_phiprofile1114_ = fs_->make<TProfile>("cas_phiprofile1114","Profile of Castor intercalibrated RecHit responses over #phi in m11-14",16,0.5,16.5);
+  cas_phiprofile1114_->SetXTitle("Azimuthal sector number");
   cas_chprofile_ = fs_->make<TProfile>("cas_chprofile","Castor intercalibrated RecHit responses in all channels",225,-0.5,224.5);
+  cas_chprofile_->SetXTitle("Channel number");
+
+  //zdcetotp/m //zdcemvshadp/m //zdcnhits //zdcsatflag //trk vs hf //hf vs cas //cas vs zdc
+  zdc_chno_satflg_ = fs_->make<TH1D>("zdc_chno_satflg","No of ZDC RecHits (0..positive), Saturation Flag (-1..negative)",41,-20.5,20.5);
+  zdc_chno_satflg_->Sumw2();
+  zdcm_etot_ = fs_->make<TH1D>("zdcm_etot","Energy in ZDCm",5500,-110000.0,110000.0);
+  zdcm_etot_->Sumw2();
+  zdcm_etot_->SetXTitle("E^{-}_{tot} (GeV)");
+  zdcp_etot_ = fs_->make<TH1D>("zdcp_etot","Energy in ZDCp",5500,-110000.0,110000.0);
+  zdcp_etot_->Sumw2();  
+  zdcp_etot_->SetXTitle("E^{+}_{tot} (GeV)");
+  zdcm_em_vs_tot_ = fs_->make<TH2D>("zdcm_em_vs_tot","ZDCM EM vs (EM + HAD)",5500,-110000.0,110000.0,5500,-110000.0,110000.0);
+  zdcm_em_vs_tot_->SetXTitle("(EM + HAD)");
+  zdcm_em_vs_tot_->SetYTitle("EM");
+  zdcp_em_vs_tot_ = fs_->make<TH2D>("zdcp_em_vs_tot","ZDCP EM vs (EM + HAD)",5500,-110000.0,110000.0,5500,-110000.0,110000.0);
+  zdcp_em_vs_tot_->SetXTitle("(EM + HAD)");
+  zdcp_em_vs_tot_->SetYTitle("EM");
+  trkno_vs_hfme_ = fs_->make<TH2D>( "trkno_vs_hfme", "No of tracks (pt>1) vs HFM Energy", 5500,-110000.0,110000.0, 1500,-0.5,1499.5);
+  trkno_vs_hfme_->SetYTitle("N_{trk}");
+  trkno_vs_hfme_->SetXTitle("E^{-}_{tot} (GeV)");
+  hfme_vs_case_ = fs_->make<TH2D>("hfme_vs_case", "HFM Energy vs Castor Energy", 5500,-110000.0,110000.0, 5500,-110000.0,110000.0);
+  hfme_vs_case_->SetYTitle("E^{-}_{tot} (GeV)");
+  hfme_vs_case_->SetXTitle("E_{tot} (GeV)");
+  case_vs_zdcme_ = fs_->make<TH2D>("case_vs_zdcme", "Castor Energy vs ZDCM Energy", 5500,-110000.0,110000.0, 5500,-110000.0,110000.0);
+  case_vs_zdcme_->SetYTitle("E_{tot} (GeV)");
+  case_vs_zdcme_->SetXTitle("E^{-}_{tot} (GeV)");
 
 }
 
@@ -658,6 +721,8 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 #elif defined OLD_44X_DATA
 	  if( iEvent.id().run()>=181530 && iEvent.id().run()<=181603) corrFactor = castor::channelFullCalibrationHI1[sec-1][mod-1];
           if( iEvent.id().run()>=181604 && iEvent.id().run()<=183126) corrFactor = castor::channelFullCalibrationHI2[sec-1][mod-1];           
+#elif defined CALIBRATED_DATA
+          corrFactor = 1.0;
 #else
           corrFactor = castor::channelGainQE[sec-1][mod-1] * ForwardRecord::absCasEscaleFactor;
 #endif
@@ -678,8 +743,10 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	treeVariables_.casRecHitIdepth[nhits] = castorid.module();
 #ifdef NEW_53X
         treeVariables_.casRecHitSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+        treeVariables_.casRecHitReSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::UserDefinedBit0) );
 #else
         treeVariables_.casRecHitSaturation[nhits] = -1;
+        treeVariables_.casRecHitReSaturation[nhits] = -1;
 #endif
       }
       nhits++;
@@ -697,37 +764,61 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   for(uint ibin = 0; ibin < 14; ibin++) cas_zprofile_->Fill(static_cast<double>(ibin+1),moduleEnergyCastor[ibin]);
 
-  /*
   // *********************************** ZDC RecHits ******************************************
 
   edm::Handle <ZDCRecHitCollection> zdcrechits_h; 
-  try{ iEvent.getByLabel("zdcreco", zdcrechits_h); }
-  catch(...) { edm::LogWarning("ZDC ") << " Cannot get ZDC RecHits " << std::endl;  }
+  try{ 
+    iEvent.getByLabel("zdcreco", zdcrechits_h); }
+  catch(...) { 
+    edm::LogWarning(" ZDC ") << " Cannot get ZDC RecHits " << std::endl;
+  }
 
   const ZDCRecHitCollection *zdcrechits = zdcrechits_h.failedToGet()? 0 : &*zdcrechits_h;
    
   int nZhits = 0; 
-  double energyZDC = 0;
+  int nFlags = 0;
+  double energyZDCzcas = 0.0;
+  double energyEmZDCzcas = 0.0;
+  double energyZDCzcasnot = 0.0;
+  double energyEmZDCzcasnot = 0.0;
   if (zdcrechits) {
-  if (_ShowDebug) edm::LogVerbatim("ZDCRecHits") << " ZDCRecHitCollection size: " << zdcrechits->size() << std::endl;
-  for( size_t i1 = 0; i1<zdcrechits->size(); ++i1){
-  const ZDCRecHit & zdcrechit = (*zdcrechits)[i1];
-  energyZDC += zdcrechit.energy();
-  if (nZhits < 18) {
-  treeVariables_.nbZDCRecHits = nZhits + 1;
-  treeVariables_.zdcRecHitEnergy[nZhits] = zdcrechit.energy();
-  treeVariables_.zdcRecHitIside[nZhits] = zdcrechit.id().zside();
-  treeVariables_.zdcRecHitIsection[nZhits] = zdcrechit.id().section();
-  treeVariables_.zdcRecHitIchannel[nZhits] = zdcrechit.id().channel();
-  //#include "RecoLocalCalo/HcalRecAlgos/interface/HcalCaloFlagLabels.h"
-  treeVariables_.zdcRecHitSaturation[nZhits] = static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
-  }
-  nZhits++;
-  } // enf of loop zdc rechits
-  if (_ShowDebug && zdcrechits->size() > 0) edm::LogVerbatim(" ZDCRecHits ") << " ZDC energy: " << energyZDC << std::endl;
+    if (_ShowDebug) edm::LogVerbatim("ZDCRecHits") << " ZDCRecHitCollection size: " << zdcrechits->size() << std::endl;
+    for( size_t i1 = 0; i1<zdcrechits->size(); ++i1 ){
+      const ZDCRecHit & zdcrechit = (*zdcrechits)[i1]; //if(zside==-1) Detector=ZDCM; if(section==1) SubDetector=EM; 2=HAD
+      int iside = zdcrechit.id().zside(); 
+      int isect = zdcrechit.id().section();
+      if (iside > 0) { //"+" and "-" were likely confused for ZDC
+         energyZDCzcas += zdcrechit.energy();
+         if (isect == 1) energyEmZDCzcas += zdcrechit.energy();
+      }
+      if (iside < 0) {
+         energyZDCzcasnot += zdcrechit.energy();
+         if (isect == 1) energyEmZDCzcasnot += zdcrechit.energy();
+      }
+      /*if (nZhits < 18) {
+         treeVariables_.nbZDCRecHits = nZhits + 1;
+         treeVariables_.zdcRecHitEnergy[nZhits] = zdcrechit.energy();
+         treeVariables_.zdcRecHitIside[nZhits] = zdcrechit.id().zside();
+         treeVariables_.zdcRecHitIsection[nZhits] = zdcrechit.id().section();
+         treeVariables_.zdcRecHitIchannel[nZhits] = zdcrechit.id().channel();
+         //#include "RecoLocalCalo/HcalRecAlgos/interface/HcalCaloFlagLabels.h"
+         treeVariables_.zdcRecHitSaturation[nZhits] = static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+      }*/
+      nFlags += static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+      nZhits++;
+    } // enf of loop zdc rechits
+    if (_ShowDebug && zdcrechits->size() > 0) edm::LogVerbatim(" ZDCRecHits ") << " ZDC energy (castor side): " << energyZDCzcas << std::endl;
   }
   else { edm::LogVerbatim("ZDCRecHits") << " Empty ZDCRecHitCollection" << std::endl; }
 
+  zdc_chno_satflg_->Fill(nZhits);
+  zdc_chno_satflg_->Fill(-(nFlags+1));
+  zdcm_etot_->Fill(energyZDCzcas); 
+  zdcp_etot_->Fill(energyZDCzcasnot);
+  zdcm_em_vs_tot_->Fill(energyZDCzcas,energyEmZDCzcas);
+  zdcp_em_vs_tot_->Fill(energyZDCzcasnot,energyEmZDCzcasnot);
+
+  /*
   // *********************************     ZDC Digis ****************************
 
   edm::Handle<ZDCDigiCollection> zdc_digi_h;
@@ -845,6 +936,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //hfShortThreshold_ && hit.id().depth() != 1
       //hfLongThreshold_ && hit.id().depth() == 1
       double eta = geo->getPosition(hfid).eta();
+      //double phi = geo->getPosition(hfid).phi();
       if (fabs(eta) < 4.0) {
 	runningSampleEnergySum_[0] += hfrh.energy(); 
 	(runningSamplesNo_[0])++;
@@ -909,7 +1001,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergiesNSD_[ibin]->Fill(etaBinEnergiesNSD[ibin]);
   }
 
-  // *********************************     HF Towers   ****************************
+  // *********************************     All (not only HF) Towers   ****************************
 
   edm::Handle<CaloTowerCollection> towers_h;
   try{ iEvent.getByLabel("towerMaker", towers_h); }
@@ -921,12 +1013,14 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   if (towers) {
     for(unsigned int i = 0; i < towers->size(); ++i){
       const CaloTower & hit= (*towers)[i];
-      if((hit.ieta() > 29 || hit.ieta() < -29) && hit.energy() > 3.0) { //in HF and above thresholds
-	if(fabs(hit.eta())<4.0) {
+      if(hit.energy() > 3.0) { //above thresholds
+        tow_ene_map_->Fill(static_cast<double>(hit.ieta()),static_cast<double>(hit.iphi()),hit.energy());
+        tow_occup_map_->Fill(static_cast<double>(hit.ieta()),static_cast<double>(hit.iphi()));
+	if((hit.ieta() > 29 || hit.ieta() < -29) && fabs(hit.eta())<4.0) { //HF eta<4
 	  runningSampleEnergySum_[4] += hit.et();
 	  (runningSamplesNo_[4])++;
 	}
-	if(fabs(hit.eta())>4.0) {
+	if((hit.ieta() > 29 || hit.ieta() < -29) && fabs(hit.eta())>4.0) { //HF eta>4
 	  runningSampleEnergySum_[5] += hit.et();
 	  (runningSamplesNo_[5])++;
 	}
@@ -938,15 +1032,23 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinTowEts_[ibin]->Fill(etaBinTowEts[ibin]);
   
   // ************************ PF Candidates   ****************************
+  // https://github.com/CmsHI/cmssw/blob/forest_53X_04/RecoHI/HiJetAlgos/plugins/ParticleTowerProducer.cc
+  /*
+   edm::Handle<reco::PFCandidateCollection> inputsHandle; //particleFlowTmp
+   iEvent.getByLabel(src_, inputsHandle);
+   for(reco::PFCandidateCollection::const_iterator ci = inputsHandle->begin(); ci!=inputsHandle->end(); ++ci) {
+   const reco::PFCandidate& particle = *ci;}
+  */
   
   edm::Handle<reco::PFCandidateCollection> pfCandidates_h;
-  try{ iEvent.getByLabel("particleFlow",pfCandidates_h); } //NO particle flow for PbPb !!!
+  try{ iEvent.getByLabel(_PFSrc,pfCandidates_h); } //NO particle flow for PbPb !!! //PFTowers //particleFlow //particleFlowTmp
   catch(...) { edm::LogWarning("PFCands ") << " Cannot get PFCands " << std::endl; }
   
   const reco::PFCandidateCollection *pfCandidateColl = pfCandidates_h.failedToGet()? 0 : &(*pfCandidates_h);
     
   std::vector<double> etaBinPFEts(ForwardRecord::nbEtaBins,0.0);
   if (pfCandidateColl) {
+    //std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     for(unsigned icand=0;icand<pfCandidateColl->size(); icand++) {
       const reco::PFCandidate pfCandidate = pfCandidateColl->at(icand);
       //pfCandidate.pt();//pfCandidate.particleId();//pfCandidate.eta();//pfCandidate.phi();
@@ -954,7 +1056,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       double eta = pfCandidate.eta();
       double energy = et*cosh(eta);		
       int id = pfCandidate.particleId();
-      bool add_particle = false;
+      bool add_particle = false; //true;//false;
       //X=0,           // undefined
       //h=1,           // charged hadron
       //e=2,           // electron 
@@ -982,7 +1084,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   if(!isData){
     edm::Handle<reco::GenParticleCollection> genParticles;
-    try { iEvent.getByLabel("hiGenParticles",genParticles); } //hiGenParticles
+    try { iEvent.getByLabel(_GenPartSrc,genParticles); } //hiGenParticles //genParticles
     catch (...) { edm::LogWarning(" GenPart ") << "No GenParticles found!" << std::endl; }
       
     const reco::GenParticleCollection* genColl= genParticles.failedToGet()? 0 : &(*genParticles);
@@ -1043,6 +1145,12 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       vtxTrkNo = pv.tracksSize();
     }
   }
+  
+  // ******************************
+
+  trkno_vs_hfme_->Fill(hfmE,static_cast<double>(trkNo));
+  hfme_vs_case_->Fill(energyCastor,hfmE);
+  case_vs_zdcme_->Fill(energyZDCzcas,energyCastor);
 
   // ******************************
 
@@ -1077,6 +1185,7 @@ RHAnalyser::endJob()
 {
 
   if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << " Reached endJob ! " << std::endl;
+  tow_ene_map_->Divide(tow_occup_map_);
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) {
     double width = fabs(ForwardRecord::Eta_Bin_Edges[ibin+1]-ForwardRecord::Eta_Bin_Edges[ibin]);
     double bincenter = (ForwardRecord::Eta_Bin_Edges[ibin+1]+ForwardRecord::Eta_Bin_Edges[ibin])/2.0;
