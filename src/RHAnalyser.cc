@@ -24,10 +24,10 @@
 // 2011 PbPb-data
 // #define OLD_44X_DATA
 // Any kind of calibrated DATA
-#define CALIBRATED_DATA 
+//#define CALIBRATED_DATA 
 // for now just a switch to enable checks of saturation flag in the recent SW (can be data or MC)
 #define NEW_53X
-//#define THIS_IS_MC
+#define THIS_IS_MC
 /**********!!!**************/
 /**************************/
 
@@ -373,7 +373,17 @@ private:
   std::vector<double> runningSampleEnergySum_;
   std::vector<int> runningSamplesNo_;
 
+  TH1D* track_no_;
   TH1D* track_pt_;
+  TH1D* track_eta_;
+  TH1D* track_phi_;
+  TH1D* vtx_no_;
+  TH1D* vtx_nofk_;
+  TH1D* vtx1_notrk_;
+  TH1D* vtx1_x_;
+  TH1D* vtx1_y_;
+  TH1D* vtx1_z_;
+  TH1D* vtx1_zerr_;
   TH1D* cas_etot_;
   TH1D* cas_etot1114_;
   TH1D* cas_etot15_;
@@ -587,9 +597,40 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   hf_resp_occup_accum_->GetXaxis()->SetBinLabel(6,"TowEt45");
 
   //high quality track pt histo!!!
+  track_no_ = fs_->make<TH1D>("track_no","High purity tracks with p_{t} > 1 GeV",300,-0.5,299.5);
+  track_no_->Sumw2();
+  track_no_->SetXTitle("Number of tracks");
   track_pt_ = fs_->make<TH1D>("track_pt","High purity track p_{t}",220,-1.0,10.0);
   track_pt_->Sumw2();  
   track_pt_->SetXTitle("p_{t} (GeV)");
+  track_eta_ = fs_->make<TH1D>("track_eta","High purity track #eta",15,-3.0,3.0);
+  track_eta_->Sumw2();
+  track_eta_->SetXTitle("#eta (GeV)");
+  track_phi_ = fs_->make<TH1D>("track_phi","High purity track #phi",50,-Geom::pi(),Geom::pi());
+  track_phi_->Sumw2();
+  track_phi_->SetXTitle("#phi (GeV)");
+  //vertex (on top of tree variables)
+  vtx_no_ = fs_->make<TH1D>("vtx_no","Size of vertex collection",10,-0.5,9.5);
+  vtx_no_->Sumw2();
+  vtx_no_->SetXTitle("Size of collection");
+  vtx_nofk_ = fs_->make<TH1D>("vtx_nofk","Number of fake vertices",10,-0.5,9.5);
+  vtx_nofk_->Sumw2();
+  vtx_nofk_->SetXTitle("Number of fakes");
+  vtx1_notrk_ = fs_->make<TH1D>("vtx1_notrk","Number of tracks attached to vertex",300,-0.5,299.5);
+  vtx1_notrk_->Sumw2();
+  vtx1_notrk_->SetXTitle("Number of attached tracks");
+  vtx1_x_ = fs_->make<TH1D>("Vertex x-position of 1st vertex if not fake","",100,-0.5,0.5);
+  vtx1_x_->Sumw2();
+  vtx1_x_->SetXTitle("V1_{x} (mm)");
+  vtx1_y_ = fs_->make<TH1D>("vtx1_y","Vertex y-position of 1st vertex if not fake",100,-0.5,0.5);
+  vtx1_y_->Sumw2();
+  vtx1_y_->SetXTitle("V1_{y} (mm)");
+  vtx1_z_ = fs_->make<TH1D>("vtx1_z","Vertex z-position of 1st vertex if not fake",100,-50.0,50.0);
+  vtx1_z_->Sumw2();
+  vtx1_z_->SetXTitle("V1_{z} (mm)");
+  vtx1_zerr_ = fs_->make<TH1D>("vtx1_zerr","Vertex z-position-error of 1st vertex if not fake",100,0.0,0.1);
+  vtx1_zerr_->Sumw2();
+  vtx1_zerr_->SetXTitle("#Delta V1_{z} (mm)");
 
   cas_etot_ = fs_->make<TH1D>("cas_etot","Total energy of Castor calibrated RecHits",168000,-12000.0,72000.0);//96000,-12000.0,36000.0);
   cas_etot_->Sumw2();
@@ -893,15 +934,18 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     for (unsigned int j = 0; j < trackHandle->size(); ++j) {
       const reco::Track& trackData = (*trackHandle)[j];
       bool highPurity = trackData.quality(reco::Track::highPurity);
-      double trk_pt = trackData.pt();//, trk_eta = trackData.eta(), trk_phi = trackData.phi();
+      double trk_pt = trackData.pt();
+      double trk_eta = trackData.eta(); 
+      double trk_phi = trackData.phi();
       if (highPurity && trk_pt > 1.0) { isOneTrack = true; trkNo++; }
       if (highPurity) track_pt_->Fill( trk_pt );
-      //h_etatrk->Fill( trk_eta );
-      //h_phitrk->Fill( trk_phi );
+      if (highPurity) track_eta_->Fill( trk_eta );
+      if (highPurity) track_phi_->Fill( trk_phi );
     }
   } else {
     edm::LogWarning(" generalTracks ") << " Cannot read TRACKS " << std::endl;
   }// end tracks
+  track_no_->Fill(static_cast<double>(trkNo));
   
 
   // *********************************     HF RecHits ****************************
@@ -1031,7 +1075,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinTowEts_[ibin]->Fill(etaBinTowEts[ibin]);
   
-  // ************************ PF Candidates   ****************************
+  // ************************ PF Candidates (for now: all candidates without "noise" cuts)   ****************************
   // https://github.com/CmsHI/cmssw/blob/forest_53X_04/RecoHI/HiJetAlgos/plugins/ParticleTowerProducer.cc
   /*
    edm::Handle<reco::PFCandidateCollection> inputsHandle; //particleFlowTmp
@@ -1054,9 +1098,9 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //pfCandidate.pt();//pfCandidate.particleId();//pfCandidate.eta();//pfCandidate.phi();
       double et = pfCandidate.pt();
       double eta = pfCandidate.eta();
-      double energy = et*cosh(eta);		
-      int id = pfCandidate.particleId();
-      bool add_particle = false; //true;//false;
+      /*double energy = et*cosh(eta);		*/
+      /*int id = pfCandidate.particleId();*/
+      bool add_particle = true; //true;/*false;*/
       //X=0,           // undefined
       //h=1,           // charged hadron
       //e=2,           // electron 
@@ -1065,13 +1109,13 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //h0=5,          // neutral hadron
       //h_HF=6,        // HF tower identified as a hadron
       //egamma_HF=7    // HF tower identified as an EM particle		
-      if(id != 4 && id != 5 && id != 6 && id != 7) add_particle = true;
+      /*if(id != 4 && id != 5 && id != 6 && id != 7) add_particle = true;
       if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
       if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
       if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
       if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
       if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
-      if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;		
+      if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;*/
       if(add_particle) {
 	const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
 	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += et;
@@ -1161,12 +1205,19 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   treeVariables_.hfmE     = hfmE;
   treeVariables_.hfmNb4   = hfmNo4;
   treeVariables_.vtxNb    = vtxNo;
+  vtx_no_->Fill(static_cast<double>(vtxNo));
   treeVariables_.vtxNbfake= vtxNofake;
+  vtx_nofk_->Fill(static_cast<double>(vtxNofake));
   treeVariables_.vtx1TrkNb= vtxTrkNo;
+  vtx1_notrk_->Fill(static_cast<double>(vtxTrkNo));
   treeVariables_.vtx1Z    = vtxZ;
+  vtx1_z_->Fill(vtxZ); 
   treeVariables_.vtx1Zerr    = vtxZerr;
+  vtx1_zerr_->Fill(vtxZerr);
   treeVariables_.vtx1Y    = vtxY;
+  vtx1_y_->Fill(vtxY);
   treeVariables_.vtx1X    = vtxX;
+  vtx1_x_->Fill(vtxX);
 
   rhtree_->Fill();
 
