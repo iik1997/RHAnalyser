@@ -597,38 +597,38 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   hf_resp_occup_accum_->GetXaxis()->SetBinLabel(6,"TowEt45");
 
   //high quality track pt histo!!!
-  track_no_ = fs_->make<TH1D>("track_no","High purity tracks with p_{t} > 1 GeV",300,-0.5,299.5);
+  track_no_ = fs_->make<TH1D>("track_no","High purity tracks with p_{t} > 1 GeV",500,-0.5,499.5);
   track_no_->Sumw2();
   track_no_->SetXTitle("Number of tracks");
-  track_pt_ = fs_->make<TH1D>("track_pt","High purity track p_{t}",220,-1.0,10.0);
+  track_pt_ = fs_->make<TH1D>("track_pt","High purity track p_{t}",1020,-1.0,50.0);
   track_pt_->Sumw2();  
   track_pt_->SetXTitle("p_{t} (GeV)");
   track_eta_ = fs_->make<TH1D>("track_eta","High purity track #eta",15,-3.0,3.0);
   track_eta_->Sumw2();
-  track_eta_->SetXTitle("#eta (GeV)");
+  track_eta_->SetXTitle("#eta");
   track_phi_ = fs_->make<TH1D>("track_phi","High purity track #phi",50,-Geom::pi(),Geom::pi());
   track_phi_->Sumw2();
-  track_phi_->SetXTitle("#phi (GeV)");
-  //vertex (on top of tree variables)
-  vtx_no_ = fs_->make<TH1D>("vtx_no","Size of vertex collection",10,-0.5,9.5);
+  track_phi_->SetXTitle("#phi");
+  //vertex (on top of already existing tree variables)
+  vtx_no_ = fs_->make<TH1D>("vtx_no","Size of vertex collection",50,-0.5,49.5);
   vtx_no_->Sumw2();
   vtx_no_->SetXTitle("Size of collection");
   vtx_nofk_ = fs_->make<TH1D>("vtx_nofk","Number of fake vertices",10,-0.5,9.5);
   vtx_nofk_->Sumw2();
   vtx_nofk_->SetXTitle("Number of fakes");
-  vtx1_notrk_ = fs_->make<TH1D>("vtx1_notrk","Number of tracks attached to vertex",300,-0.5,299.5);
+  vtx1_notrk_ = fs_->make<TH1D>("vtx1_notrk","Number of tracks attached to vertex",500,-0.5,499.5);
   vtx1_notrk_->Sumw2();
   vtx1_notrk_->SetXTitle("Number of attached tracks");
-  vtx1_x_ = fs_->make<TH1D>("Vertex x-position of 1st vertex if not fake","",100,-0.5,0.5);
+  vtx1_x_ = fs_->make<TH1D>("vtx1_x","Vertex x-position of 1st vertex if not fake",500,-0.5,0.5);
   vtx1_x_->Sumw2();
   vtx1_x_->SetXTitle("V1_{x} (mm)");
-  vtx1_y_ = fs_->make<TH1D>("vtx1_y","Vertex y-position of 1st vertex if not fake",100,-0.5,0.5);
+  vtx1_y_ = fs_->make<TH1D>("vtx1_y","Vertex y-position of 1st vertex if not fake",500,-0.5,0.5);
   vtx1_y_->Sumw2();
   vtx1_y_->SetXTitle("V1_{y} (mm)");
   vtx1_z_ = fs_->make<TH1D>("vtx1_z","Vertex z-position of 1st vertex if not fake",100,-50.0,50.0);
   vtx1_z_->Sumw2();
   vtx1_z_->SetXTitle("V1_{z} (mm)");
-  vtx1_zerr_ = fs_->make<TH1D>("vtx1_zerr","Vertex z-position-error of 1st vertex if not fake",100,0.0,0.1);
+  vtx1_zerr_ = fs_->make<TH1D>("vtx1_zerr","Vertex z-position-error of 1st vertex if not fake",200,0.0,0.1);
   vtx1_zerr_->Sumw2();
   vtx1_zerr_->SetXTitle("#Delta V1_{z} (mm)");
 
