@@ -7,10 +7,10 @@ def main(argv):
     pathInVariable1 = 'RelValTTbar_13_CMSSW_7_0_0_pre9-PU25ns_POSTLS162_V1-v3' #'RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V3-v1'
     pathInVariable2 = 'RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V5-v1update' #'RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V5-v1'
 
-    preFix = '/afs/cern.ch/user/k/katkov/afswork/hiforest/CMSSW_4_2_8/src/Analysis/RHAnalyser/test/./RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V5_vs_7_0_0_pre9-PU25ns_POSTLS162_V1/merged_' #'/afs/cern.ch/user/k/katkov/afswork/hiforest/CMSSW_4_2_8/src/Analysis/RHAnalyser/test/./RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V3_vs_V5/merged_'
+    preFix = '/afs/cern.ch/work/k/katkov/hiforest/CMSSW_7_1_0_pre6/src/Analysis/RHAnalyser/test/scripts/RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V5_vs_7_0_0_pre9-PU25ns_POSTLS162_V1/merged_' #'/afs/cern.ch/user/k/katkov/afswork/hiforest/CMSSW_4_2_8/src/Analysis/RHAnalyser/test/./RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V5_vs_7_0_0_pre9-PU25ns_POSTLS162_V1/merged_' #'/afs/cern.ch/user/k/katkov/afswork/hiforest/CMSSW_4_2_8/src/Analysis/RHAnalyser/test/./RelValTTbar_13_CMSSW_7_1_0_pre6-PU25ns_PRE_LS171_V3_vs_V5/merged_'
 
     idTags = (
-      ('genet_vs_eta_reco','1','kFALSE'),('pfet_vs_eta_reco','1','kFALSE'),('track_pt','10','kTRUE'),('towet_vs_eta_reco','1','kFALSE'),('energy_vs_eta_reco','1','kFALSE'),('et_vs_eta_reco','1','kFALSE'),('energy_reco_0','80','kTRUE'),('energy_reco_1','80','kTRUE'),('cas_etot15','200','kTRUE'),('cas_zprofile','1','kFALSE'),('cas_phiprofile15','1','kFALSE'),('towet_reco_3','200','kTRUE'),('cas_chprofile','1','kFALSE')
+      ('genet_vs_eta_reco','1','kFALSE'),('pfet_vs_eta_reco','1','kFALSE'),('track_pt','10','kTRUE'),('vtx1_y','1','kTRUE'),('vtx1_zerr','1','kFALSE'),('towet_vs_eta_reco','1','kFALSE'),('energy_vs_eta_reco','1','kFALSE'),('et_vs_eta_reco','1','kFALSE'),('energy_reco_0','80','kTRUE'),('energy_reco_1','80','kTRUE'),('cas_etot15','200','kTRUE'),('cas_zprofile','1','kFALSE'),('cas_phiprofile15','1','kFALSE'),('towet_reco_3','200','kTRUE'),('cas_chprofile','1','kFALSE') #normally one sets kFALSE for profile histograms
     )
 
     for idTag in idTags:
