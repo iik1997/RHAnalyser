@@ -338,6 +338,10 @@ private:
 
   edm::Service<TFileService> fs_;
 
+  std::map< std::string, TH2D* > histos2D_;
+  std::map< std::string, TH1D* > histos1D_;
+  std::map< std::string, TProfile* > histosProfile_;
+
   const CaloGeometry* geo;
 
   bool _ShowDebug;
@@ -350,13 +354,13 @@ private:
 
   MonVariables treeVariables_;
 
-  TProfile* energy_vs_eta_reco_;
-  TProfile* et_vs_eta_reco_;
-  TProfile* towet_vs_eta_reco_;
-  TH2D* tow_ene_map_;
-  TH2D* tow_occup_map_;
-  TProfile* pfet_vs_eta_reco_;
-  TProfile* genet_vs_eta_reco_;
+  //TProfile* energy_vs_eta_reco_;
+  //TProfile* et_vs_eta_reco_;
+  //TProfile* towet_vs_eta_reco_;
+  //TH2D* tow_ene_map_;
+  //TH2D* tow_occup_map_;
+  //TProfile* pfet_vs_eta_reco_;
+  //TProfile* genet_vs_eta_reco_;
   std::vector<TH1D*> etaBinEnergies_;
   std::vector<TH1D*> etaBinEts_;
   std::vector<TH1D*> etaBinTowEts_;
@@ -368,41 +372,42 @@ private:
   std::vector<TH1D*> etaBinEnergies1trk4_;
   std::vector<TH1D*> etaBinEnergiesBX_;
   std::vector<TH1D*> etaBinEnergiesNSD_;
-  TH1D* hf_resp_accum_;
-  TH1D* hf_resp_occup_accum_;
+  //TH1D* hf_resp_accum_;
+  //TH1D* hf_resp_occup_accum_;
   std::vector<double> runningSampleEnergySum_;
   std::vector<int> runningSamplesNo_;
 
-  TH1D* track_no_;
-  TH1D* track_pt_;
-  TH1D* track_eta_;
-  TH1D* track_phi_;
-  TH1D* vtx_no_;
-  TH1D* vtx_nofk_;
-  TH1D* vtx1_notrk_;
+  //TH1D* track_no_;
+  //TH1D* track_pt_;
+  //TH1D* track_eta_;
+  //TH1D* track_phi_;
+  //TH1D* vtx_no_;
+  //TH1D* vtx_nofk_;
+  //TH1D* vtx1_notrk_;
+  /*
   TH1D* vtx1_x_;
   TH1D* vtx1_y_;
   TH1D* vtx1_z_;
-  TH1D* vtx1_zerr_;
-  TH1D* cas_etot_;
+  TH1D* vtx1_zerr_;*/
+  /*TH1D* cas_etot_;
   TH1D* cas_etot1114_;
   TH1D* cas_etot15_;
   TH1D* cas_etotbx_;
-  TH1D* cas_etot1114bx_;
-  TProfile* cas_zprofile_;
+  TH1D* cas_etot1114bx_;*/
+  /*TProfile* cas_zprofile_; //Modify all those to histosProfile_[]
   TProfile* cas_phiprofile_;
   TProfile* cas_phiprofile15_;
   TProfile* cas_phiprofile1114_;
-  TProfile* cas_chprofile_;
+  TProfile* cas_chprofile_;*/
 
-  TH1D* zdc_chno_satflg_;
+  /*TH1D* zdc_chno_satflg_;
   TH1D* zdcm_etot_;
   TH1D* zdcp_etot_;
   TH2D* zdcm_em_vs_tot_;
   TH2D* zdcp_em_vs_tot_;
   TH2D* trkno_vs_hfme_;
   TH2D* hfme_vs_case_;
-  TH2D* case_vs_zdcme_;
+  TH2D* case_vs_zdcme_;*/
 
 };
 
@@ -478,33 +483,33 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
     rhtree_->Branch("zdcDigiEnergyADC",treeVariables_.zdcDigiEnergyADC,"zdcDigiEnergyADC[nbZDCDigis][nbZDCDigiTs]/I");
   
   */
-
-  energy_vs_eta_reco_ = fs_->make<TProfile>("energy_vs_eta_reco","Detector-level <Energy> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
-  energy_vs_eta_reco_->Sumw2();
-  energy_vs_eta_reco_->SetXTitle("#eta");
-  energy_vs_eta_reco_->SetYTitle("<E>/#Delta#eta");
-  et_vs_eta_reco_ = fs_->make<TProfile>("et_vs_eta_reco","Detector-level <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
-  et_vs_eta_reco_->Sumw2();
-  et_vs_eta_reco_->SetXTitle("#eta");
-  et_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");
-  towet_vs_eta_reco_ = fs_->make<TProfile>("towet_vs_eta_reco","Detector-level tower <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
-  towet_vs_eta_reco_->Sumw2();
-  towet_vs_eta_reco_->SetXTitle("#eta");
-  towet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");
-  tow_ene_map_ = fs_->make<TH2D>("tow_ene_map","ieta-iphi map of tower energies",199,-99.5,99.5,100,-0.5,99.5);
-  tow_ene_map_->SetXTitle("i#eta");
-  tow_ene_map_->SetYTitle("i#phi");
-  tow_occup_map_=fs_->make<TH2D>("tow_occup_map","Number of towers above threshold as an ieta-iphi map",199,-99.5,99.5,100,-0.5,99.5);
-  tow_occup_map_->SetXTitle("i#eta");
-  tow_occup_map_->SetYTitle("i#phi");
-  pfet_vs_eta_reco_ = fs_->make<TProfile>("pfet_vs_eta_reco","Detector-level PF <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
-  pfet_vs_eta_reco_->Sumw2();
-  pfet_vs_eta_reco_->SetXTitle("#eta");
-  pfet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");  
-  genet_vs_eta_reco_ = fs_->make<TProfile>("genet_vs_eta_reco","Particle-level <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
-  genet_vs_eta_reco_->Sumw2();
-  genet_vs_eta_reco_->SetXTitle("#eta");
-  genet_vs_eta_reco_->SetYTitle("<Et>/#Delta#eta");  
+  
+  histosProfile_["energy_vs_eta_reco"] = fs_->make<TProfile>("energy_vs_eta_reco","Detector-level <Energy> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  histosProfile_["energy_vs_eta_reco"]->Sumw2();
+  histosProfile_["energy_vs_eta_reco"]->SetXTitle("#eta");
+  histosProfile_["energy_vs_eta_reco"]->SetYTitle("<E>/#Delta#eta");
+  histosProfile_["et_vs_eta_reco"] = fs_->make<TProfile>("et_vs_eta_reco","Detector-level <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  histosProfile_["et_vs_eta_reco"]->Sumw2();
+  histosProfile_["et_vs_eta_reco"]->SetXTitle("#eta");
+  histosProfile_["et_vs_eta_reco"]->SetYTitle("<Et>/#Delta#eta");
+  histosProfile_["towet_vs_eta_reco"] = fs_->make<TProfile>("towet_vs_eta_reco","Detector-level tower <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  histosProfile_["towet_vs_eta_reco"]->Sumw2();
+  histosProfile_["towet_vs_eta_reco"]->SetXTitle("#eta");
+  histosProfile_["towet_vs_eta_reco"]->SetYTitle("<Et>/#Delta#eta");
+  histos2D_["tow_ene_map"] = fs_->make<TH2D>("tow_ene_map","ieta-iphi map of tower energies",199,-99.5,99.5,100,-0.5,99.5);
+  histos2D_["tow_ene_map"]->SetXTitle("i#eta");
+  histos2D_["tow_ene_map"]->SetYTitle("i#phi");
+  histos2D_["tow_occup_map"]=fs_->make<TH2D>("tow_occup_map","Number of towers above threshold as an ieta-iphi map",199,-99.5,99.5,100,-0.5,99.5);
+  histos2D_["tow_occup_map"]->SetXTitle("i#eta");
+  histos2D_["tow_occup_map"]->SetYTitle("i#phi");
+  histosProfile_["pfet_vs_eta_reco"] = fs_->make<TProfile>("pfet_vs_eta_reco","Detector-level PF <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  histosProfile_["pfet_vs_eta_reco"]->Sumw2();
+  histosProfile_["pfet_vs_eta_reco"]->SetXTitle("#eta");
+  histosProfile_["pfet_vs_eta_reco"]->SetYTitle("<Et>/#Delta#eta");  
+  histosProfile_["genet_vs_eta_reco"] = fs_->make<TProfile>("genet_vs_eta_reco","Particle-level <Et> vs #eta",ForwardRecord::nbEtaBins,ForwardRecord::Eta_Bin_Edges);
+  histosProfile_["genet_vs_eta_reco"]->Sumw2();
+  histosProfile_["genet_vs_eta_reco"]->SetXTitle("#eta");
+  histosProfile_["genet_vs_eta_reco"]->SetYTitle("<Et>/#Delta#eta");  
   etaBinEnergies_.reserve(ForwardRecord::nbEtaBins);
   etaBinEts_.reserve(ForwardRecord::nbEtaBins);
   etaBinTowEts_.reserve(ForwardRecord::nbEtaBins);
@@ -578,110 +583,114 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
     etaBinEnergiesNSD_.push_back(theHisto6);
   }  
 
-  hf_resp_accum_ = fs_->make<TH1D>("hf_resp_accum","HF sum of responses", 6 , 0.5, 6.5); //
-  hf_resp_accum_->Sumw2();
-  hf_resp_accum_->GetXaxis()->SetBinLabel(1,"RHe34");
-  hf_resp_accum_->GetXaxis()->SetBinLabel(2,"RHe45");
-  hf_resp_accum_->GetXaxis()->SetBinLabel(3,"RHet34");
-  hf_resp_accum_->GetXaxis()->SetBinLabel(4,"RHet45");
-  hf_resp_accum_->GetXaxis()->SetBinLabel(5,"TowEt34");
-  hf_resp_accum_->GetXaxis()->SetBinLabel(6,"TowEt45");
+  histos1D_["hf_resp_accum"] = fs_->make<TH1D>("hf_resp_accum","HF sum of responses", 6 , 0.5, 6.5); //
+  histos1D_["hf_resp_accum"]->Sumw2();
+  histos1D_["hf_resp_accum"]->GetXaxis()->SetBinLabel(1,"RHe34");
+  histos1D_["hf_resp_accum"]->GetXaxis()->SetBinLabel(2,"RHe45");
+  histos1D_["hf_resp_accum"]->GetXaxis()->SetBinLabel(3,"RHet34");
+  histos1D_["hf_resp_accum"]->GetXaxis()->SetBinLabel(4,"RHet45");
+  histos1D_["hf_resp_accum"]->GetXaxis()->SetBinLabel(5,"TowEt34");
+  histos1D_["hf_resp_accum"]->GetXaxis()->SetBinLabel(6,"TowEt45");
 
-  hf_resp_occup_accum_ = fs_->make<TH1D>("hf_resp_occup_accum","HF sum of occupancies", 6 , 0.5, 6.5); //
-  hf_resp_occup_accum_->Sumw2();
-  hf_resp_occup_accum_->GetXaxis()->SetBinLabel(1,"RHe34");
-  hf_resp_occup_accum_->GetXaxis()->SetBinLabel(2,"RHe45");
-  hf_resp_occup_accum_->GetXaxis()->SetBinLabel(3,"RHet34");
-  hf_resp_occup_accum_->GetXaxis()->SetBinLabel(4,"RHet45");
-  hf_resp_occup_accum_->GetXaxis()->SetBinLabel(5,"TowEt34");
-  hf_resp_occup_accum_->GetXaxis()->SetBinLabel(6,"TowEt45");
+  histos1D_["hf_resp_occup_accum"] = fs_->make<TH1D>("hf_resp_occup_accum","HF sum of occupancies", 6 , 0.5, 6.5); //
+  histos1D_["hf_resp_occup_accum"]->Sumw2();
+  histos1D_["hf_resp_occup_accum"]->GetXaxis()->SetBinLabel(1,"RHe34");
+  histos1D_["hf_resp_occup_accum"]->GetXaxis()->SetBinLabel(2,"RHe45");
+  histos1D_["hf_resp_occup_accum"]->GetXaxis()->SetBinLabel(3,"RHet34");
+  histos1D_["hf_resp_occup_accum"]->GetXaxis()->SetBinLabel(4,"RHet45");
+  histos1D_["hf_resp_occup_accum"]->GetXaxis()->SetBinLabel(5,"TowEt34");
+  histos1D_["hf_resp_occup_accum"]->GetXaxis()->SetBinLabel(6,"TowEt45");
 
   //high quality track pt histo!!!
-  track_no_ = fs_->make<TH1D>("track_no","High purity tracks with p_{t} > 1 GeV",500,-0.5,499.5);
-  track_no_->Sumw2();
-  track_no_->SetXTitle("Number of tracks");
-  track_pt_ = fs_->make<TH1D>("track_pt","High purity track p_{t}",1020,-1.0,50.0);
-  track_pt_->Sumw2();  
-  track_pt_->SetXTitle("p_{t} (GeV)");
-  track_eta_ = fs_->make<TH1D>("track_eta","High purity track #eta",15,-3.0,3.0);
-  track_eta_->Sumw2();
-  track_eta_->SetXTitle("#eta");
-  track_phi_ = fs_->make<TH1D>("track_phi","High purity track #phi",50,-Geom::pi(),Geom::pi());
-  track_phi_->Sumw2();
-  track_phi_->SetXTitle("#phi");
+  histos1D_["track_no"] = fs_->make<TH1D>("track_no","High purity tracks with p_{t} > 1 GeV",500,-0.5,499.5);
+  histos1D_["track_no"]->Sumw2();
+  histos1D_["track_no"]->SetXTitle("Number of tracks");
+  histos1D_["track_pt"] = fs_->make<TH1D>("track_pt","High purity track p_{t}",1020,-1.0,50.0);
+  histos1D_["track_pt"]->Sumw2();  
+  histos1D_["track_pt"]->SetXTitle("p_{t} (GeV)");
+  histos1D_["track_eta"] = fs_->make<TH1D>("track_eta","High purity track #eta",15,-3.0,3.0);
+  histos1D_["track_eta"]->Sumw2();
+  histos1D_["track_eta"]->SetXTitle("#eta");
+  histos1D_["track_phi"] = fs_->make<TH1D>("track_phi","High purity track #phi",50,-Geom::pi(),Geom::pi());
+  histos1D_["track_phi"]->Sumw2();
+  histos1D_["track_phi"]->SetXTitle("#phi");
   //vertex (on top of already existing tree variables)
-  vtx_no_ = fs_->make<TH1D>("vtx_no","Size of vertex collection",50,-0.5,49.5);
-  vtx_no_->Sumw2();
-  vtx_no_->SetXTitle("Size of collection");
-  vtx_nofk_ = fs_->make<TH1D>("vtx_nofk","Number of fake vertices",10,-0.5,9.5);
-  vtx_nofk_->Sumw2();
-  vtx_nofk_->SetXTitle("Number of fakes");
-  vtx1_notrk_ = fs_->make<TH1D>("vtx1_notrk","Number of tracks attached to vertex",500,-0.5,499.5);
-  vtx1_notrk_->Sumw2();
-  vtx1_notrk_->SetXTitle("Number of attached tracks");
-  vtx1_x_ = fs_->make<TH1D>("vtx1_x","Vertex x-position of 1st vertex if not fake",500,-0.5,0.5);
-  vtx1_x_->Sumw2();
-  vtx1_x_->SetXTitle("V1_{x} (mm)");
-  vtx1_y_ = fs_->make<TH1D>("vtx1_y","Vertex y-position of 1st vertex if not fake",500,-0.5,0.5);
-  vtx1_y_->Sumw2();
-  vtx1_y_->SetXTitle("V1_{y} (mm)");
-  vtx1_z_ = fs_->make<TH1D>("vtx1_z","Vertex z-position of 1st vertex if not fake",100,-50.0,50.0);
-  vtx1_z_->Sumw2();
-  vtx1_z_->SetXTitle("V1_{z} (mm)");
-  vtx1_zerr_ = fs_->make<TH1D>("vtx1_zerr","Vertex z-position-error of 1st vertex if not fake",200,0.0,0.1);
-  vtx1_zerr_->Sumw2();
-  vtx1_zerr_->SetXTitle("#Delta V1_{z} (mm)");
+  histos1D_["vtx_no"] = fs_->make<TH1D>("vtx_no","Size of vertex collection",50,-0.5,49.5);
+  histos1D_["vtx_no"]->Sumw2();
+  histos1D_["vtx_no"]->SetXTitle("Size of collection");
+  histos1D_["vtx_nofk"] = fs_->make<TH1D>("vtx_nofk","Number of fake vertices",10,-0.5,9.5);
+  histos1D_["vtx_nofk"]->Sumw2();
+  histos1D_["vtx_nofk"]->SetXTitle("Number of fakes");
+  histos1D_["vtx1_notrk"] = fs_->make<TH1D>("vtx1_notrk","Number of tracks attached to vertex",500,-0.5,499.5);
+  histos1D_["vtx1_notrk"]->Sumw2();
+  histos1D_["vtx1_notrk"]->SetXTitle("Number of attached tracks");
+  histos1D_["vtx1_x"] = fs_->make<TH1D>("vtx1_x","Vertex x-position of 1st vertex if not fake",500,-0.5,0.5);
+  histos1D_["vtx1_x"]->Sumw2();
+  histos1D_["vtx1_x"]->SetXTitle("V1_{x} (mm)");
+  histos1D_["vtx1_y"] = fs_->make<TH1D>("vtx1_y","Vertex y-position of 1st vertex if not fake",500,-0.5,0.5);
+  histos1D_["vtx1_y"]->Sumw2();
+  histos1D_["vtx1_y"]->SetXTitle("V1_{y} (mm)");
+  histos1D_["vtx1_z"] = fs_->make<TH1D>("vtx1_z","Vertex z-position of 1st vertex if not fake",100,-50.0,50.0);
+  histos1D_["vtx1_z"]->Sumw2();
+  histos1D_["vtx1_z"]->SetXTitle("V1_{z} (mm)");
+  histos1D_["vtx1_zerr"] = fs_->make<TH1D>("vtx1_zerr","Vertex z-position-error of 1st vertex if not fake",200,0.0,0.1);
+  histos1D_["vtx1_zerr"]->Sumw2();
+  histos1D_["vtx1_zerr"]->SetXTitle("#Delta V1_{z} (mm)");
 
-  cas_etot_ = fs_->make<TH1D>("cas_etot","Total energy of Castor calibrated RecHits",168000,-12000.0,72000.0);//96000,-12000.0,36000.0);
-  cas_etot_->Sumw2();
-  cas_etot_->SetXTitle("E_{tot} (GeV)");
-  cas_etot15_ = fs_->make<TH1D>("cas_etot15","Total energy of Castor calibrated RecHits in m1-5",96000,-12000.0,36000.0);
-  cas_etot15_->Sumw2();
-  cas_etot15_->SetXTitle("E_{m1-5} (GeV)");
-  cas_etot1114_ = fs_->make<TH1D>("cas_etot1114","Total energy of Castor calibrated RecHits in m11-14",96000,-12000.0,36000.0);
-  cas_etot1114_->Sumw2();
-  cas_etot1114_->SetXTitle("E_{m11-14} (GeV)");
-  cas_etotbx_ = fs_->make<TH1D>("cas_etotbx","Total energy of Castor calibrated RecHits (selected BX)",96000,-12000.0,36000.0);
-  cas_etotbx_->Sumw2();
-  cas_etotbx_->SetXTitle("E_{tot} (GeV)");
-  cas_etot1114bx_ = fs_->make<TH1D>("cas_etot1114bx","Total energy of Castor calibrated RecHits in m11-14 (selected BX)",96000,-12000.0,36000.0);
-  cas_etot1114bx_->Sumw2();
-  cas_etot1114bx_->SetXTitle("E_{m11-14} (GeV)");
-  cas_zprofile_ = fs_->make<TProfile>("cas_zprofile","Profile of Castor intercalibrated RecHit responses along z",14,0.5,14.5);
-  cas_zprofile_->SetXTitle("Longitudinal module number");
-  cas_phiprofile_ = fs_->make<TProfile>("cas_phiprofile","Profile of Castor intercalibrated RecHit responses over #phi ",16,0.5,16.5);
-  cas_phiprofile_->SetXTitle("Azimuthal sector number");
-  cas_phiprofile15_ = fs_->make<TProfile>("cas_phiprofile15","Profile of Castor intercalibrated RecHit responses over #phi in m1-5",16,0.5,16.5);
-  cas_phiprofile15_->SetXTitle("Azimuthal sector number");
-  cas_phiprofile1114_ = fs_->make<TProfile>("cas_phiprofile1114","Profile of Castor intercalibrated RecHit responses over #phi in m11-14",16,0.5,16.5);
-  cas_phiprofile1114_->SetXTitle("Azimuthal sector number");
-  cas_chprofile_ = fs_->make<TProfile>("cas_chprofile","Castor intercalibrated RecHit responses in all channels",225,-0.5,224.5);
-  cas_chprofile_->SetXTitle("Channel number");
+  histos1D_["cas_etot"] = fs_->make<TH1D>("cas_etot","Total energy of Castor calibrated RecHits",168000,-12000.0,72000.0);//96000,-12000.0,36000.0);
+  histos1D_["cas_etot"]->Sumw2();
+  histos1D_["cas_etot"]->SetXTitle("E_{tot} (GeV)");
+  histos1D_["cas_etot15"] = fs_->make<TH1D>("cas_etot15","Total energy of Castor calibrated RecHits in m1-5",96000,-12000.0,36000.0);
+  histos1D_["cas_etot15"]->Sumw2();
+  histos1D_["cas_etot15"]->SetXTitle("E_{m1-5} (GeV)");
+  histos1D_["cas_etot1114"] = fs_->make<TH1D>("cas_etot1114","Total energy of Castor calibrated RecHits in m11-14",96000,-12000.0,36000.0);
+  histos1D_["cas_etot1114"]->Sumw2();
+  histos1D_["cas_etot1114"]->SetXTitle("E_{m11-14} (GeV)");
+  histos1D_["cas_etotbx"] = fs_->make<TH1D>("cas_etotbx","Total energy of Castor calibrated RecHits (selected BX)",96000,-12000.0,36000.0);
+  histos1D_["cas_etotbx"]->Sumw2();
+  histos1D_["cas_etotbx"]->SetXTitle("E_{tot} (GeV)");
+  histos1D_["cas_etot1114bx"] = fs_->make<TH1D>("cas_etot1114bx","Total energy of Castor calibrated RecHits in m11-14 (selected BX)",96000,-12000.0,36000.0);
+  histos1D_["cas_etot1114bx"]->Sumw2();
+  histos1D_["cas_etot1114bx"]->SetXTitle("E_{m11-14} (GeV)");
+  histosProfile_["cas_zprofile"] = fs_->make<TProfile>("cas_zprofile","Profile of Castor intercalibrated RecHit responses along z",14,0.5,14.5);
+  histosProfile_["cas_zprofile"]->SetXTitle("Longitudinal module number");
+  histosProfile_["cas_phiprofile"] = fs_->make<TProfile>("cas_phiprofile","Profile of Castor intercalibrated RecHit responses over #phi ",16,0.5,16.5);
+  histosProfile_["cas_phiprofile"]->SetXTitle("Azimuthal sector number");
+  histosProfile_["cas_phiprofile15"] = fs_->make<TProfile>("cas_phiprofile15","Profile of Castor intercalibrated RecHit responses over #phi in m1-5",16,0.5,16.5);
+  histosProfile_["cas_phiprofile15"]->SetXTitle("Azimuthal sector number");
+  histosProfile_["cas_phiprof15_caliboff"] = fs_->make<TProfile>("cas_phiprof15_caliboff","Profile Castor RH resp, #phi, m1-5, no offline qual-calib",16,0.5,16.5);
+  histosProfile_["cas_phiprof15_caliboff"]->SetXTitle("Azimuthal sector number");
+  histosProfile_["cas_phiprofile1114"] = fs_->make<TProfile>("cas_phiprofile1114","Profile of Castor intercalibrated RecHit responses over #phi in m11-14",16,0.5,16.5);
+  histosProfile_["cas_phiprofile1114"]->SetXTitle("Azimuthal sector number");
+  histosProfile_["cas_chprofile"] = fs_->make<TProfile>("cas_chprofile","Castor intercalibrated RecHit responses in all channels",225,-0.5,224.5);
+  histosProfile_["cas_chprofile"]->SetXTitle("Channel number");
+  histos1D_["cas_chno_satflg"] = fs_->make<TH1D>("cas_chno_satflg","No of Castor RecHits (0..positive), Saturation Flag (-1..negative)",449,-224.5,224.5);
+  histos1D_["cas_chno_satflg"]->Sumw2();
 
   //zdcetotp/m //zdcemvshadp/m //zdcnhits //zdcsatflag //trk vs hf //hf vs cas //cas vs zdc
-  zdc_chno_satflg_ = fs_->make<TH1D>("zdc_chno_satflg","No of ZDC RecHits (0..positive), Saturation Flag (-1..negative)",41,-20.5,20.5);
-  zdc_chno_satflg_->Sumw2();
-  zdcm_etot_ = fs_->make<TH1D>("zdcm_etot","Energy in ZDCm",5500,-110000.0,110000.0);
-  zdcm_etot_->Sumw2();
-  zdcm_etot_->SetXTitle("E^{-}_{tot} (GeV)");
-  zdcp_etot_ = fs_->make<TH1D>("zdcp_etot","Energy in ZDCp",5500,-110000.0,110000.0);
-  zdcp_etot_->Sumw2();  
-  zdcp_etot_->SetXTitle("E^{+}_{tot} (GeV)");
-  zdcm_em_vs_tot_ = fs_->make<TH2D>("zdcm_em_vs_tot","ZDCM EM vs (EM + HAD)",5500,-110000.0,110000.0,5500,-110000.0,110000.0);
-  zdcm_em_vs_tot_->SetXTitle("(EM + HAD)");
-  zdcm_em_vs_tot_->SetYTitle("EM");
-  zdcp_em_vs_tot_ = fs_->make<TH2D>("zdcp_em_vs_tot","ZDCP EM vs (EM + HAD)",5500,-110000.0,110000.0,5500,-110000.0,110000.0);
-  zdcp_em_vs_tot_->SetXTitle("(EM + HAD)");
-  zdcp_em_vs_tot_->SetYTitle("EM");
-  trkno_vs_hfme_ = fs_->make<TH2D>( "trkno_vs_hfme", "No of tracks (pt>1) vs HFM Energy", 5500,-110000.0,110000.0, 1500,-0.5,1499.5);
-  trkno_vs_hfme_->SetYTitle("N_{trk}");
-  trkno_vs_hfme_->SetXTitle("E^{-}_{tot} (GeV)");
-  hfme_vs_case_ = fs_->make<TH2D>("hfme_vs_case", "HFM Energy vs Castor Energy", 5500,-110000.0,110000.0, 5500,-110000.0,110000.0);
-  hfme_vs_case_->SetYTitle("E^{-}_{tot} (GeV)");
-  hfme_vs_case_->SetXTitle("E_{tot} (GeV)");
-  case_vs_zdcme_ = fs_->make<TH2D>("case_vs_zdcme", "Castor Energy vs ZDCM Energy", 5500,-110000.0,110000.0, 5500,-110000.0,110000.0);
-  case_vs_zdcme_->SetYTitle("E_{tot} (GeV)");
-  case_vs_zdcme_->SetXTitle("E^{-}_{tot} (GeV)");
+  histos1D_["zdc_chno_satflg"] = fs_->make<TH1D>("zdc_chno_satflg","No of ZDC RecHits (0..positive), Saturation Flag (-1..negative)",41,-20.5,20.5);
+  histos1D_["zdc_chno_satflg"]->Sumw2();
+  histos1D_["zdcm_etot"] = fs_->make<TH1D>("zdcm_etot","Energy in ZDCm",5500,-110000.0,110000.0);
+  histos1D_["zdcm_etot"]->Sumw2();
+  histos1D_["zdcm_etot"]->SetXTitle("E^{-}_{tot} (GeV)");
+  histos1D_["zdcp_etot"] = fs_->make<TH1D>("zdcp_etot","Energy in ZDCp",5500,-110000.0,110000.0);
+  histos1D_["zdcp_etot"]->Sumw2();  
+  histos1D_["zdcp_etot"]->SetXTitle("E^{+}_{tot} (GeV)");
+  histos2D_["zdcm_em_vs_tot"] = fs_->make<TH2D>("zdcm_em_vs_tot","ZDCM EM vs (EM + HAD)",5500,-110000.0,110000.0,5500,-110000.0,110000.0);
+  histos2D_["zdcm_em_vs_tot"]->SetXTitle("(EM + HAD)");
+  histos2D_["zdcm_em_vs_tot"]->SetYTitle("EM");
+  histos2D_["zdcp_em_vs_tot"] = fs_->make<TH2D>("zdcp_em_vs_tot","ZDCP EM vs (EM + HAD)",5500,-110000.0,110000.0,5500,-110000.0,110000.0);
+  histos2D_["zdcp_em_vs_tot"]->SetXTitle("(EM + HAD)");
+  histos2D_["zdcp_em_vs_tot"]->SetYTitle("EM");
+  histos2D_["trkno_vs_hfme"] = fs_->make<TH2D>( "trkno_vs_hfme", "No of tracks (pt>1) vs HFM Energy", 5500,-110000.0,110000.0, 1500,-0.5,1499.5);
+  histos2D_["trkno_vs_hfme"]->SetYTitle("N_{trk}");
+  histos2D_["trkno_vs_hfme"]->SetXTitle("E^{-}_{tot} (GeV)");
+  histos2D_["hfme_vs_case"] = fs_->make<TH2D>("hfme_vs_case", "HFM Energy vs Castor Energy", 5500,-110000.0,110000.0, 5500,-110000.0,110000.0);
+  histos2D_["hfme_vs_case"]->SetYTitle("E^{-}_{tot} (GeV)");
+  histos2D_["hfme_vs_case"]->SetXTitle("E_{tot} (GeV)");
+  histos2D_["case_vs_zdcme"] = fs_->make<TH2D>("case_vs_zdcme", "Castor Energy vs ZDCM Energy", 5500,-110000.0,110000.0, 5500,-110000.0,110000.0);
+  histos2D_["case_vs_zdcme"]->SetYTitle("E_{tot} (GeV)");
+  histos2D_["case_vs_zdcme"]->SetXTitle("E^{-}_{tot} (GeV)");
 
 }
 
@@ -735,6 +744,8 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   try{ iEvent.getByLabel("castorreco",casrechits); }
   catch(...) { edm::LogWarning(" CASTOR ") << " Cannot get Castor RecHits " << std::endl; }
 
+  int nHitsIgnoreQualCalib = 0;
+  int nFlagsIgnoreQualCalib = 0;
   int nhits = 0;
   double energyCastor = 0;
   double energyCastor15 = 0;
@@ -742,6 +753,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   treeVariables_.nbCasRecHits = 0; 
   std::vector<double> sectorEnergyCastor(16,0.0);
   std::vector<double> sectorEnergyCastor15(16,0.0);
+  std::vector<double> sectorEnergyCastor15IgnoreQualCalib(16,0.0);
   std::vector<double> sectorEnergyCastor1114(16,0.0);
   std::vector<double> moduleEnergyCastor(14,0.0);
   if(casrechits.failedToGet()!=0 || !casrechits.isValid()) {
@@ -775,35 +787,45 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         moduleEnergyCastor[mod-1] += corrFactor * rh.energy();    
         if(mod>0 && mod<6) energyCastor15 += corrFactor * rh.energy();
         if(mod>10 && mod<15) energyCastor1114 += corrFactor * rh.energy();
-        cas_chprofile_->Fill(static_cast<double>(ich),corrFactor * rh.energy());
-      }
-      if (nhits  < 224) {
-        treeVariables_.nbCasRecHits = nhits + 1 ;
-	treeVariables_.casRecHitEnergy[nhits] = corrFactor * rh.energy();
-	treeVariables_.casRecHitIphi[nhits] = castorid.sector();
-	treeVariables_.casRecHitIdepth[nhits] = castorid.module();
+        histosProfile_["cas_chprofile"]->Fill(static_cast<double>(ich),corrFactor * rh.energy());
+        if (nhits  < 224) {
+          treeVariables_.nbCasRecHits = nhits + 1 ;
+          treeVariables_.casRecHitEnergy[nhits] = corrFactor * rh.energy();
+          treeVariables_.casRecHitIphi[nhits] = castorid.sector();
+          treeVariables_.casRecHitIdepth[nhits] = castorid.module();
 #ifdef NEW_53X
-        treeVariables_.casRecHitSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
-        treeVariables_.casRecHitReSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::UserDefinedBit0) );
+          treeVariables_.casRecHitSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+          treeVariables_.casRecHitReSaturation[nhits] = static_cast<int>( rh.flagField(HcalCaloFlagLabels::UserDefinedBit0) );
 #else
-        treeVariables_.casRecHitSaturation[nhits] = -1;
-        treeVariables_.casRecHitReSaturation[nhits] = -1;
+          treeVariables_.casRecHitSaturation[nhits] = -1;
+          treeVariables_.casRecHitReSaturation[nhits] = -1;
 #endif
+        }
+        nhits++;
+      } else {
+        corrFactor = 0.0;
       }
-      nhits++;
+      if(ich >= 0 && ich <= 223) {
+        if(mod>0 && mod<6) sectorEnergyCastor15IgnoreQualCalib[sec-1] += rh.energy(); //ignore both "offline" channel quality and calibration
+        nFlagsIgnoreQualCalib += static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+        nHitsIgnoreQualCalib++;
+      }
     } // end loop castor rechits
     if (_ShowDebug && casrechits->size() > 0) edm::LogVerbatim(" CastorRecHits ") << " Castor energy: " << energyCastor << std::endl;
   }
 
-  cas_etot_->Fill(energyCastor);
-  cas_etot15_->Fill(energyCastor15);
-  cas_etot1114_->Fill(energyCastor1114);
+  histos1D_["cas_etot"]->Fill(energyCastor);
+  histos1D_["cas_etot15"]->Fill(energyCastor15);
+  histos1D_["cas_etot1114"]->Fill(energyCastor1114);
   for(uint ibin = 0; ibin < 16; ibin++) {
-    cas_phiprofile_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor[ibin]);
-    cas_phiprofile15_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor15[ibin]);
-    cas_phiprofile1114_->Fill(static_cast<double>(ibin+1),sectorEnergyCastor1114[ibin]); 
+    histosProfile_["cas_phiprofile"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor[ibin]);
+    histosProfile_["cas_phiprofile15"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor15[ibin]);
+    histosProfile_["cas_phiprof15_caliboff"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor15IgnoreQualCalib[ibin]);
+    histosProfile_["cas_phiprofile1114"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor1114[ibin]); 
   }
-  for(uint ibin = 0; ibin < 14; ibin++) cas_zprofile_->Fill(static_cast<double>(ibin+1),moduleEnergyCastor[ibin]);
+  for(uint ibin = 0; ibin < 14; ibin++) histosProfile_["cas_zprofile"]->Fill(static_cast<double>(ibin+1),moduleEnergyCastor[ibin]);
+  histos1D_["cas_chno_satflg"]->Fill(static_cast<double>(nHitsIgnoreQualCalib));
+  histos1D_["cas_chno_satflg"]->Fill(-static_cast<double>(nFlagsIgnoreQualCalib+1));
 
   // *********************************** ZDC RecHits ******************************************
 
@@ -852,12 +874,12 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   else { edm::LogVerbatim("ZDCRecHits") << " Empty ZDCRecHitCollection" << std::endl; }
 
-  zdc_chno_satflg_->Fill(nZhits);
-  zdc_chno_satflg_->Fill(-(nFlags+1));
-  zdcm_etot_->Fill(energyZDCzcas); 
-  zdcp_etot_->Fill(energyZDCzcasnot);
-  zdcm_em_vs_tot_->Fill(energyZDCzcas,energyEmZDCzcas);
-  zdcp_em_vs_tot_->Fill(energyZDCzcasnot,energyEmZDCzcasnot);
+  histos1D_["zdc_chno_satflg"]->Fill(nZhits);
+  histos1D_["zdc_chno_satflg"]->Fill(-(nFlags+1));
+  histos1D_["zdcm_etot"]->Fill(energyZDCzcas); 
+  histos1D_["zdcp_etot"]->Fill(energyZDCzcasnot);
+  histos2D_["zdcm_em_vs_tot"]->Fill(energyZDCzcas,energyEmZDCzcas);
+  histos2D_["zdcp_em_vs_tot"]->Fill(energyZDCzcasnot,energyEmZDCzcasnot);
 
   /*
   // *********************************     ZDC Digis ****************************
@@ -938,14 +960,14 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       double trk_eta = trackData.eta(); 
       double trk_phi = trackData.phi();
       if (highPurity && trk_pt > 1.0) { isOneTrack = true; trkNo++; }
-      if (highPurity) track_pt_->Fill( trk_pt );
-      if (highPurity) track_eta_->Fill( trk_eta );
-      if (highPurity) track_phi_->Fill( trk_phi );
+      if (highPurity) histos1D_["track_pt"]->Fill( trk_pt );
+      if (highPurity) histos1D_["track_eta"]->Fill( trk_eta );
+      if (highPurity) histos1D_["track_phi"]->Fill( trk_phi );
     }
   } else {
     edm::LogWarning(" generalTracks ") << " Cannot read TRACKS " << std::endl;
   }// end tracks
-  track_no_->Fill(static_cast<double>(trkNo));
+  histos1D_["track_no"]->Fill(static_cast<double>(trkNo));
   
 
   // *********************************     HF RecHits ****************************
@@ -1000,7 +1022,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	hfmE += hfrh.energy();
 	if (hfrh.energy() > 4.0) hfmNo4++;
       }
-      const uint ibin = energy_vs_eta_reco_->FindBin( eta ); 
+      const uint ibin = histosProfile_["energy_vs_eta_reco"]->FindBin( eta ); 
       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergies[ibin-1] += hfrh.energy();
       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEts[ibin-1] += hfrh.energy()/cosh(eta); 
       if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinEnergies1trk[ibin-1] += hfrh.energy();
@@ -1038,8 +1060,8 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       bx == 2934
        ) {
     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergiesBX_[ibin]->Fill(etaBinEnergiesBX[ibin]);
-    cas_etotbx_->Fill(energyCastor);
-    cas_etot1114bx_->Fill(energyCastor1114);
+    histos1D_["cas_etotbx"]->Fill(energyCastor);
+    histos1D_["cas_etot1114bx"]->Fill(energyCastor1114);
   }
   if (hfpNo4 > 0 && hfmNo4 > 0) {
     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinEnergiesNSD_[ibin]->Fill(etaBinEnergiesNSD[ibin]);
@@ -1058,8 +1080,8 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     for(unsigned int i = 0; i < towers->size(); ++i){
       const CaloTower & hit= (*towers)[i];
       if(hit.energy() > 3.0) { //above thresholds
-        tow_ene_map_->Fill(static_cast<double>(hit.ieta()),static_cast<double>(hit.iphi()),hit.energy());
-        tow_occup_map_->Fill(static_cast<double>(hit.ieta()),static_cast<double>(hit.iphi()));
+        histos2D_["tow_ene_map"]->Fill(static_cast<double>(hit.ieta()),static_cast<double>(hit.iphi()),hit.energy());
+        histos2D_["tow_occup_map"]->Fill(static_cast<double>(hit.ieta()),static_cast<double>(hit.iphi()));
 	if((hit.ieta() > 29 || hit.ieta() < -29) && fabs(hit.eta())<4.0) { //HF eta<4
 	  runningSampleEnergySum_[4] += hit.et();
 	  (runningSamplesNo_[4])++;
@@ -1068,7 +1090,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  runningSampleEnergySum_[5] += hit.et();
 	  (runningSamplesNo_[5])++;
 	}
-	const uint ibin = energy_vs_eta_reco_->FindBin( hit.eta() );     
+	const uint ibin = histosProfile_["energy_vs_eta_reco"]->FindBin( hit.eta() );     
 	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinTowEts[ibin-1] += hit.et();
       }
     }
@@ -1117,7 +1139,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
       if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;*/
       if(add_particle) {
-	const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
+	const uint ibin = histosProfile_["energy_vs_eta_reco"]->FindBin( eta );		
 	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += et;
       }	
     }
@@ -1148,7 +1170,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	double et = gen.pt();
 	double eta = gen.eta();
 	//double rap = 0.5*ln((energy()+pz())/(energy()-pz()));//charge(); px();py();pz();mass();et();
-	const uint ibin = energy_vs_eta_reco_->FindBin( eta );		
+	const uint ibin = histosProfile_["energy_vs_eta_reco"]->FindBin( eta );		
 	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinGenEts[ibin-1] += et;             
       }
     }
@@ -1192,9 +1214,9 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   // ******************************
 
-  trkno_vs_hfme_->Fill(hfmE,static_cast<double>(trkNo));
-  hfme_vs_case_->Fill(energyCastor,hfmE);
-  case_vs_zdcme_->Fill(energyZDCzcas,energyCastor);
+  histos2D_["trkno_vs_hfme"]->Fill(hfmE,static_cast<double>(trkNo));
+  histos2D_["hfme_vs_case"]->Fill(energyCastor,hfmE);
+  histos2D_["case_vs_zdcme"]->Fill(energyZDCzcas,energyCastor);
 
   // ******************************
 
@@ -1205,19 +1227,19 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   treeVariables_.hfmE     = hfmE;
   treeVariables_.hfmNb4   = hfmNo4;
   treeVariables_.vtxNb    = vtxNo;
-  vtx_no_->Fill(static_cast<double>(vtxNo));
+  histos1D_["vtx_no"]->Fill(static_cast<double>(vtxNo));
   treeVariables_.vtxNbfake= vtxNofake;
-  vtx_nofk_->Fill(static_cast<double>(vtxNofake));
+  histos1D_["vtx_nofk"]->Fill(static_cast<double>(vtxNofake));
   treeVariables_.vtx1TrkNb= vtxTrkNo;
-  vtx1_notrk_->Fill(static_cast<double>(vtxTrkNo));
+  histos1D_["vtx1_notrk"]->Fill(static_cast<double>(vtxTrkNo));
   treeVariables_.vtx1Z    = vtxZ;
-  vtx1_z_->Fill(vtxZ); 
+  histos1D_["vtx1_z"]->Fill(vtxZ); 
   treeVariables_.vtx1Zerr    = vtxZerr;
-  vtx1_zerr_->Fill(vtxZerr);
+  histos1D_["vtx1_zerr"]->Fill(vtxZerr);
   treeVariables_.vtx1Y    = vtxY;
-  vtx1_y_->Fill(vtxY);
+  histos1D_["vtx1_y"]->Fill(vtxY);
   treeVariables_.vtx1X    = vtxX;
-  vtx1_x_->Fill(vtxX);
+  histos1D_["vtx1_x"]->Fill(vtxX);
 
   rhtree_->Fill();
 
@@ -1236,30 +1258,30 @@ RHAnalyser::endJob()
 {
 
   if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << " Reached endJob ! " << std::endl;
-  tow_ene_map_->Divide(tow_occup_map_);
+  histos2D_["tow_ene_map"]->Divide(histos2D_["tow_occup_map"]);
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) {
     double width = fabs(ForwardRecord::Eta_Bin_Edges[ibin+1]-ForwardRecord::Eta_Bin_Edges[ibin]);
     double bincenter = (ForwardRecord::Eta_Bin_Edges[ibin+1]+ForwardRecord::Eta_Bin_Edges[ibin])/2.0;
     if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << "MEAN-e: " << etaBinEnergies_[ibin]->GetMean(1) << "MEAN-et: " << etaBinEts_[ibin]->GetMean(1) << " Width: " << width << std::endl;
     if(width > 1e-9) {
-      energy_vs_eta_reco_->Fill(bincenter,etaBinEnergies_[ibin]->GetMean(1)/width);
-      //energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
-      et_vs_eta_reco_->Fill(bincenter,etaBinEts_[ibin]->GetMean(1)/width);
-      //et_vs_eta_reco_->SetBinError(ibin+1,etaBinEts_[ibin]->GetMeanError(1)/width);       
-      towet_vs_eta_reco_->Fill(bincenter,etaBinTowEts_[ibin]->GetMean(1)/width);
-      //towet_vs_eta_reco_->SetBinError(ibin+1,etaBinTowEts_[ibin]->GetMeanError(1)/width);   
-      pfet_vs_eta_reco_->Fill(bincenter,etaBinPFEts_[ibin]->GetMean(1)/width);
-      //pfet_vs_eta_reco_->SetBinError(ibin+1,etaBinPFEts_[ibin]->GetMeanError(1)/width);   
-      genet_vs_eta_reco_->Fill(bincenter,etaBinGenEts_[ibin]->GetMean(1)/width);
+      histosProfile_["energy_vs_eta_reco"]->Fill(bincenter,etaBinEnergies_[ibin]->GetMean(1)/width);
+      //histosProfile_["energy_vs_eta_reco"]->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
+      histosProfile_["et_vs_eta_reco"]->Fill(bincenter,etaBinEts_[ibin]->GetMean(1)/width);
+      //histosProfile_["et_vs_eta_reco"]->SetBinError(ibin+1,etaBinEts_[ibin]->GetMeanError(1)/width);       
+      histosProfile_["towet_vs_eta_reco"]->Fill(bincenter,etaBinTowEts_[ibin]->GetMean(1)/width);
+      //histosProfile_["towet_vs_eta_reco"]->SetBinError(ibin+1,etaBinTowEts_[ibin]->GetMeanError(1)/width);   
+      histosProfile_["pfet_vs_eta_reco"]->Fill(bincenter,etaBinPFEts_[ibin]->GetMean(1)/width);
+      //histosProfile_["pfet_vs_eta_reco"]->SetBinError(ibin+1,etaBinPFEts_[ibin]->GetMeanError(1)/width);   
+      histosProfile_["genet_vs_eta_reco"]->Fill(bincenter,etaBinGenEts_[ibin]->GetMean(1)/width);
     }
-    //if(width > 1e-9) energy_vs_eta_reco_->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetRMS(1)/width);
+    //if(width > 1e-9) histosProfile_["energy_vs_eta_reco"]->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetRMS(1)/width);
   }
   for(int i1 = 0; i1 < 6; i1++) {
     /*hf_resp_->SetBinContent(i1+1, //do not do the division here: will merge many files later
       runningSampleEnergySum_[i1] / static_cast<double>(runningSamplesNo_[i1])
       );*/
-    hf_resp_accum_->SetBinContent(i1+1, runningSampleEnergySum_[i1] );   
-    hf_resp_occup_accum_->SetBinContent(i1+1, static_cast<double>(runningSamplesNo_[i1]) ); 
+    histos1D_["hf_resp_accum"]->SetBinContent(i1+1, runningSampleEnergySum_[i1] );   
+    histos1D_["hf_resp_occup_accum"]->SetBinContent(i1+1, static_cast<double>(runningSamplesNo_[i1]) );
   }
 
 }
