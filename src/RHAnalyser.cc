@@ -66,8 +66,10 @@
 //#include "DataFormats/CaloTowers/interface/CaloTower.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/JetReco/interface/CaloJetCollection.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/JetReco/interface/GenJetCollection.h"
 
 // castor
 //#include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
@@ -75,6 +77,11 @@
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
 #include "CalibFormats/CastorObjects/interface/CastorDbRecord.h"
 #include "CalibFormats/CastorObjects/interface/CastorDbService.h"
+#include "DataFormats/CastorReco/interface/CastorTower.h"
+//castor jet
+#include "DataFormats/JetReco/interface/BasicJet.h"
+#include "DataFormats/JetReco/interface/CastorJetID.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 //tfileservice
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -102,11 +109,14 @@
 #include "TLorentzVector.h"
 //#include "DataFormats/Math/interface/LorentzVector.h"
 #include "TText.h"
+#include "TEfficiency.h"
 
 namespace ForwardRecord {
   
-  const uint nbEtaBins = 16;
+  const uint nbEtaBins = 20; //16
   const double Eta_Bin_Edges[nbEtaBins+1] = {
+    -6.6,
+    -5.5,   //EtaMin = -5.5 if castor is not fully enabled in CMSSW MC
     -5.19, 
     -4.89, 
     -4.54, 
@@ -123,7 +133,9 @@ namespace ForwardRecord {
     4.19, 
     4.54, 
     4.89, 
-    5.19
+    5.19,
+    5.5,
+    6.6
   };
 
   const unsigned int CSectors = 16;
@@ -197,47 +209,47 @@ namespace castor {
      {     0.5000 ,    0.5000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000  },
      {     0.5000 ,    0.5000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000 ,    1.0000  }};
 #elif defined OLD_44X_DATA
-//for the next two tables you have problems with swapped channels in the e-map: tables assume corrected e-map, so get rid of the channels in the bad channel list above:
-// s5m10<->s5m12, s6m10<->s6m12, s7m10<->s7m12
-//for runs >=181530 && <=181603 
+  //for the next two tables you have problems with swapped channels in the e-map: tables assume corrected e-map, so get rid of the channels in the bad channel list above:
+  // s5m10<->s5m12, s6m10<->s6m12, s7m10<->s7m12
+  //for runs >=181530 && <=181603 
   const double channelFullCalibrationHI1[ForwardRecord::CSectors][ForwardRecord::CModules] =
-//       mod1            2            3            4            5            6            7            8            9           10           11           12           13           14
-{{     0.18495,     0.11952,     0.37649,     0.14166,     0.25474,     0.46429,     0.39233,     0.22713,     0.10552,     0.11956,     0.09858,     0.11220,     0.09621,     0.14243}, // s 1
- {     0.10485,     0.13385,     0.31328,     0.38071,     0.21649,     0.52951,     0.28841,     0.39027,     0.12423,     0.18388,     0.12229,     0.12109,     0.09886,     0.17016}, // s 2
- {     0.22034,     0.12004,     0.33844,     0.11442,     0.48180,     1.20719,     0.00000,     0.00000,     0.18567,     0.09967,     0.09804,     0.11879,     0.07494,     0.18650}, // s 3
- {     0.18419,     0.04722,     0.18544,     0.12960,     0.23316,     0.65600,     0.73333,     0.00000,     0.00000,     0.13856,     0.08191,     0.14840,     0.09660,     0.17110}, // s 4
- {     0.18037,     0.19413,     0.25994,     0.11838,     0.12625,     0.09974,     0.45542,    -0.00000,     0.00000,     0.00456,     0.03951,     0.14642,     0.02530,     0.05922}, // s 5
- {     0.16242,     0.14450,     0.25352,     0.12882,     0.14926,     0.14460,     0.00000,    -0.00000,     0.03382,     0.06135,     0.03623,     0.01288,     0.02831,     0.06928}, // s 6
- {     0.15914,     0.18249,     0.09443,     0.16489,     0.14572,     0.03201,    -0.00000,     0.31665,     0.03391,     0.00000,     0.04154,     0.01179,     0.02974,     0.06963}, // s 7
- {     0.13352,     0.09071,     0.15396,     0.11714,     0.21436,     0.02758,     0.00000,     0.25105,     0.02596,     0.03165,     0.04870,     0.03363,     0.04201,     0.06358}, // s 8
- {     0.13137,     0.12946,     0.20657,     0.15690,     0.83175,     0.03946,     0.00000,     0.33162,     0.08513,     0.12195,     0.19210,     0.12288,     0.14428,     0.10421}, // s 9
- {     0.15101,     0.17270,     0.19651,     0.16710,     0.80184,     0.11002,     0.00000,     0.32877,     0.11603,     0.11513,     0.21953,     0.13693,     0.17226,     0.12786}, // s10
- {     0.12553,     0.11964,     0.18151,     0.17484,     0.45408,     0.08196,     0.00000,     0.00000,     0.10772,     0.13814,     0.10941,     0.10977,     0.12545,     0.12008}, // s11
- {     0.10688,     0.11094,     0.19901,     0.17168,     0.78103,     0.17369,     0.00000,     0.00000,     0.12530,     0.10031,     0.18125,     0.11565,     0.15497,     0.11406}, // s12
- {     0.24803,     0.12523,     0.37815,     0.23653,     0.66186,     0.26966,     0.00000,     0.00000,     0.00000,     0.10463,     0.12428,     0.09990,     0.00000,     0.22826}, // s13
- {     0.25662,     0.13909,     0.23652,     0.34411,     0.74027,     0.22282,     0.00000,    -0.00000,     0.11054,     0.12363,     0.07838,     0.10696,     0.12513,     0.19703}, // s14
- {     0.18672,     0.18555,     0.10587,     0.28700,     0.41646,     0.32892,     0.00000,    -0.00000,     0.11059,     0.10379,     0.07880,     0.09307,     0.07529,     0.14927}, // s15
- {     0.12822,     0.14803,     0.39631,     0.26655,     0.52847,     0.26153,     0.00000,     0.00000,     0.11174,     0.13799,     0.08952,     0.10944,     0.10081,     0.13628}};// s16
+    //       mod1            2            3            4            5            6            7            8            9           10           11           12           13           14
+    {{     0.18495,     0.11952,     0.37649,     0.14166,     0.25474,     0.46429,     0.39233,     0.22713,     0.10552,     0.11956,     0.09858,     0.11220,     0.09621,     0.14243}, // s 1
+     {     0.10485,     0.13385,     0.31328,     0.38071,     0.21649,     0.52951,     0.28841,     0.39027,     0.12423,     0.18388,     0.12229,     0.12109,     0.09886,     0.17016}, // s 2
+     {     0.22034,     0.12004,     0.33844,     0.11442,     0.48180,     1.20719,     0.00000,     0.00000,     0.18567,     0.09967,     0.09804,     0.11879,     0.07494,     0.18650}, // s 3
+     {     0.18419,     0.04722,     0.18544,     0.12960,     0.23316,     0.65600,     0.73333,     0.00000,     0.00000,     0.13856,     0.08191,     0.14840,     0.09660,     0.17110}, // s 4
+     {     0.18037,     0.19413,     0.25994,     0.11838,     0.12625,     0.09974,     0.45542,    -0.00000,     0.00000,     0.00456,     0.03951,     0.14642,     0.02530,     0.05922}, // s 5
+     {     0.16242,     0.14450,     0.25352,     0.12882,     0.14926,     0.14460,     0.00000,    -0.00000,     0.03382,     0.06135,     0.03623,     0.01288,     0.02831,     0.06928}, // s 6
+     {     0.15914,     0.18249,     0.09443,     0.16489,     0.14572,     0.03201,    -0.00000,     0.31665,     0.03391,     0.00000,     0.04154,     0.01179,     0.02974,     0.06963}, // s 7
+     {     0.13352,     0.09071,     0.15396,     0.11714,     0.21436,     0.02758,     0.00000,     0.25105,     0.02596,     0.03165,     0.04870,     0.03363,     0.04201,     0.06358}, // s 8
+     {     0.13137,     0.12946,     0.20657,     0.15690,     0.83175,     0.03946,     0.00000,     0.33162,     0.08513,     0.12195,     0.19210,     0.12288,     0.14428,     0.10421}, // s 9
+     {     0.15101,     0.17270,     0.19651,     0.16710,     0.80184,     0.11002,     0.00000,     0.32877,     0.11603,     0.11513,     0.21953,     0.13693,     0.17226,     0.12786}, // s10
+     {     0.12553,     0.11964,     0.18151,     0.17484,     0.45408,     0.08196,     0.00000,     0.00000,     0.10772,     0.13814,     0.10941,     0.10977,     0.12545,     0.12008}, // s11
+     {     0.10688,     0.11094,     0.19901,     0.17168,     0.78103,     0.17369,     0.00000,     0.00000,     0.12530,     0.10031,     0.18125,     0.11565,     0.15497,     0.11406}, // s12
+     {     0.24803,     0.12523,     0.37815,     0.23653,     0.66186,     0.26966,     0.00000,     0.00000,     0.00000,     0.10463,     0.12428,     0.09990,     0.00000,     0.22826}, // s13
+     {     0.25662,     0.13909,     0.23652,     0.34411,     0.74027,     0.22282,     0.00000,    -0.00000,     0.11054,     0.12363,     0.07838,     0.10696,     0.12513,     0.19703}, // s14
+     {     0.18672,     0.18555,     0.10587,     0.28700,     0.41646,     0.32892,     0.00000,    -0.00000,     0.11059,     0.10379,     0.07880,     0.09307,     0.07529,     0.14927}, // s15
+     {     0.12822,     0.14803,     0.39631,     0.26655,     0.52847,     0.26153,     0.00000,     0.00000,     0.11174,     0.13799,     0.08952,     0.10944,     0.10081,     0.13628}};// s16
  
-//for runs >=181604 && <=183126
-const double channelFullCalibrationHI2[ForwardRecord::CSectors][ForwardRecord::CModules] =
-//       mod1            2            3            4            5            6            7            8            9           10           11           12           13           14
-{{     0.18612,     0.10041,     0.37486,     0.14133,     0.35172,     0.45087,     0.45185,     0.23070,     0.10587,     0.12015,     0.09898,     0.11312,     0.09582,     0.14146}, // s 1
- {     0.10558,     0.11418,     0.31181,     0.37948,     0.29684,     0.50754,     0.26382,     0.39027,     0.12463,     0.18184,     0.12276,     0.12070,     0.09808,     0.17082}, // s 2
- {     0.13348,     0.23710,     0.33720,     0.11479,     0.65876,     1.19037,     0.00000,     0.00000,     0.18567,     0.09959,     0.09725,     0.11940,     0.07485,     0.18480}, // s 3
- {     0.11197,     0.09410,     0.18472,     0.13004,     0.32342,     0.64023,     0.79802,     0.00000,     0.00000,     0.13842,     0.08109,     0.14751,     0.09701,     0.17055}, // s 4
- {     0.18037,     0.19315,     0.26181,     0.11838,     0.12443,     0.09550,     0.42714,    -0.00000,     0.00000,     0.00453,     0.03928,     0.14855,     0.02519,     0.05896}, // s 5
- {     0.16242,     0.14371,     0.25176,     0.12882,     0.14858,     0.14341,     0.00000,     0.00000,     0.03441,     0.06172,     0.03642,     0.01288,     0.02819,     0.06895}, // s 6
- {     0.15984,     0.18156,     0.09443,     0.16489,     0.14635,     0.03236,    -0.00000,     0.31709,     0.03423,     0.00000,     0.04186,     0.01183,     0.02967,     0.06978}, // s 7
- {     0.13352,     0.09120,     0.15396,     0.11817,     0.21436,     0.02681,     0.00000,     0.25228,     0.02596,     0.03186,     0.04895,     0.03386,     0.04219,     0.06402}, // s 8
- {     0.13137,     0.12946,     0.20821,     0.15740,     0.83508,     0.03929,     0.00000,     0.33018,     0.08482,     0.12195,     0.19326,     0.12375,     0.14428,     0.10421}, // s 9
- {     0.15002,     0.17161,     0.19651,     0.16651,     0.80009,     0.10986,     0.00000,     0.32754,     0.11560,     0.11430,     0.21953,     0.13597,     0.17065,     0.12786}, // s10
- {     0.12262,     0.11985,     0.18113,     0.17484,     0.45191,     0.08110,     0.00000,     0.00000,     0.10772,     0.13719,     0.10941,     0.10901,     0.12485,     0.12008}, // s11
- {     0.10444,     0.11119,     0.19946,     0.17121,     0.77631,     0.17539,     0.00000,     0.00000,     0.12573,     0.10031,     0.18125,     0.11565,     0.15423,     0.11327}, // s12
- {     0.24803,     0.12486,     0.37815,     0.23653,     0.65000,     0.26966,     0.00000,     0.00000,     0.00000,     0.10494,     0.12428,     0.09921,     0.00000,     0.22941}, // s13
- {     0.25662,     0.13984,     0.23652,     0.34276,     0.73554,     0.21843,    -0.00000,     0.00000,     0.11054,     0.12353,     0.07846,     0.10611,     0.12425,     0.19604}, // s14
- {     0.18672,     0.18755,     0.10629,     0.28618,     0.41646,     0.31653,     0.00000,    -0.00000,     0.11059,     0.10390,     0.07926,     0.09334,     0.07547,     0.15018}, // s15
- {     0.12877,     0.14950,     0.39765,     0.26655,     0.53047,     0.25053,     0.00000,     0.00000,     0.11174,     0.13815,     0.08934,     0.10944,     0.10101,     0.13737}};// s16
+  //for runs >=181604 && <=183126
+  const double channelFullCalibrationHI2[ForwardRecord::CSectors][ForwardRecord::CModules] =
+    //       mod1            2            3            4            5            6            7            8            9           10           11           12           13           14
+    {{     0.18612,     0.10041,     0.37486,     0.14133,     0.35172,     0.45087,     0.45185,     0.23070,     0.10587,     0.12015,     0.09898,     0.11312,     0.09582,     0.14146}, // s 1
+     {     0.10558,     0.11418,     0.31181,     0.37948,     0.29684,     0.50754,     0.26382,     0.39027,     0.12463,     0.18184,     0.12276,     0.12070,     0.09808,     0.17082}, // s 2
+     {     0.13348,     0.23710,     0.33720,     0.11479,     0.65876,     1.19037,     0.00000,     0.00000,     0.18567,     0.09959,     0.09725,     0.11940,     0.07485,     0.18480}, // s 3
+     {     0.11197,     0.09410,     0.18472,     0.13004,     0.32342,     0.64023,     0.79802,     0.00000,     0.00000,     0.13842,     0.08109,     0.14751,     0.09701,     0.17055}, // s 4
+     {     0.18037,     0.19315,     0.26181,     0.11838,     0.12443,     0.09550,     0.42714,    -0.00000,     0.00000,     0.00453,     0.03928,     0.14855,     0.02519,     0.05896}, // s 5
+     {     0.16242,     0.14371,     0.25176,     0.12882,     0.14858,     0.14341,     0.00000,     0.00000,     0.03441,     0.06172,     0.03642,     0.01288,     0.02819,     0.06895}, // s 6
+     {     0.15984,     0.18156,     0.09443,     0.16489,     0.14635,     0.03236,    -0.00000,     0.31709,     0.03423,     0.00000,     0.04186,     0.01183,     0.02967,     0.06978}, // s 7
+     {     0.13352,     0.09120,     0.15396,     0.11817,     0.21436,     0.02681,     0.00000,     0.25228,     0.02596,     0.03186,     0.04895,     0.03386,     0.04219,     0.06402}, // s 8
+     {     0.13137,     0.12946,     0.20821,     0.15740,     0.83508,     0.03929,     0.00000,     0.33018,     0.08482,     0.12195,     0.19326,     0.12375,     0.14428,     0.10421}, // s 9
+     {     0.15002,     0.17161,     0.19651,     0.16651,     0.80009,     0.10986,     0.00000,     0.32754,     0.11560,     0.11430,     0.21953,     0.13597,     0.17065,     0.12786}, // s10
+     {     0.12262,     0.11985,     0.18113,     0.17484,     0.45191,     0.08110,     0.00000,     0.00000,     0.10772,     0.13719,     0.10941,     0.10901,     0.12485,     0.12008}, // s11
+     {     0.10444,     0.11119,     0.19946,     0.17121,     0.77631,     0.17539,     0.00000,     0.00000,     0.12573,     0.10031,     0.18125,     0.11565,     0.15423,     0.11327}, // s12
+     {     0.24803,     0.12486,     0.37815,     0.23653,     0.65000,     0.26966,     0.00000,     0.00000,     0.00000,     0.10494,     0.12428,     0.09921,     0.00000,     0.22941}, // s13
+     {     0.25662,     0.13984,     0.23652,     0.34276,     0.73554,     0.21843,    -0.00000,     0.00000,     0.11054,     0.12353,     0.07846,     0.10611,     0.12425,     0.19604}, // s14
+     {     0.18672,     0.18755,     0.10629,     0.28618,     0.41646,     0.31653,     0.00000,    -0.00000,     0.11059,     0.10390,     0.07926,     0.09334,     0.07547,     0.15018}, // s15
+     {     0.12877,     0.14950,     0.39765,     0.26655,     0.53047,     0.25053,     0.00000,     0.00000,     0.11174,     0.13815,     0.08934,     0.10944,     0.10101,     0.13737}};// s16
 #else
   // Katerina's values using halo muon data (w/o TOTEM), already scaled by s9m4
   const double channelGainQE[ForwardRecord::CSectors][ForwardRecord::CModules] =                                                                                // sector
@@ -316,7 +328,7 @@ private:
     int    casRecHitSaturation[224];
     int    casRecHitReSaturation[224];
 
-   /*
+    /*
       int nbZDCRecHits;
       double zdcRecHitEnergy[18];
       int    zdcRecHitIside[18];
@@ -336,14 +348,29 @@ private:
     
   };
 
+  //CasDigis:
+  bool firstTimeDigi_;
+  struct NewBunch {
+    HcalCastorDetId detid;
+    bool usedflag;
+    double tsCapId[20];
+    double tsAdc[20];    // pedestal??
+    double tsfC[20];
+  };
+  int numBunches_;
+  std::vector<NewBunch> Bunches_; //Container for data, 1 per channel
+
   edm::Service<TFileService> fs_;
 
   std::map< std::string, TH2D* > histos2D_;
   std::map< std::string, TH1D* > histos1D_;
   std::map< std::string, TProfile* > histosProfile_;
+  std::map< std::string, TEfficiency* > histosEff_;
 
   const CaloGeometry* geo;
 
+  bool _DoCasDigi;
+  bool _DoAdvanced;
   bool _ShowDebug;
   edm::InputTag _VtxSrc;
   edm::InputTag _TrkSrc;
@@ -385,29 +412,29 @@ private:
   //TH1D* vtx_nofk_;
   //TH1D* vtx1_notrk_;
   /*
-  TH1D* vtx1_x_;
-  TH1D* vtx1_y_;
-  TH1D* vtx1_z_;
-  TH1D* vtx1_zerr_;*/
+    TH1D* vtx1_x_;
+    TH1D* vtx1_y_;
+    TH1D* vtx1_z_;
+    TH1D* vtx1_zerr_;*/
   /*TH1D* cas_etot_;
-  TH1D* cas_etot1114_;
-  TH1D* cas_etot15_;
-  TH1D* cas_etotbx_;
-  TH1D* cas_etot1114bx_;*/
+    TH1D* cas_etot1114_;
+    TH1D* cas_etot15_;
+    TH1D* cas_etotbx_;
+    TH1D* cas_etot1114bx_;*/
   /*TProfile* cas_zprofile_; //Modify all those to histosProfile_[]
-  TProfile* cas_phiprofile_;
-  TProfile* cas_phiprofile15_;
-  TProfile* cas_phiprofile1114_;
-  TProfile* cas_chprofile_;*/
+    TProfile* cas_phiprofile_;
+    TProfile* cas_phiprofile15_;
+    TProfile* cas_phiprofile1114_;
+    TProfile* cas_chprofile_;*/
 
   /*TH1D* zdc_chno_satflg_;
-  TH1D* zdcm_etot_;
-  TH1D* zdcp_etot_;
-  TH2D* zdcm_em_vs_tot_;
-  TH2D* zdcp_em_vs_tot_;
-  TH2D* trkno_vs_hfme_;
-  TH2D* hfme_vs_case_;
-  TH2D* case_vs_zdcme_;*/
+    TH1D* zdcm_etot_;
+    TH1D* zdcp_etot_;
+    TH2D* zdcm_em_vs_tot_;
+    TH2D* zdcp_em_vs_tot_;
+    TH2D* trkno_vs_hfme_;
+    TH2D* hfme_vs_case_;
+    TH2D* case_vs_zdcme_;*/
 
 };
 
@@ -423,6 +450,9 @@ private:
 // constructors and destructor
 //
 RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
+  _DoCasDigi ( iConfig.getUntrackedParameter<bool>("doCasDigi",false) ), 
+  _DoAdvanced ( iConfig.getUntrackedParameter<bool>("doAdvanced",false) ),
+  //execute castor- and central-jet related code
   _ShowDebug ( iConfig.getUntrackedParameter<bool>("showDebug",true) ),
   _VtxSrc ( iConfig.getUntrackedParameter<edm::InputTag>("vtxSrc",edm::InputTag("offlinePrimaryVertices")) ), 
   //pp: "offlinePrimaryVertices"//HI: "hiSelectedVertex"
@@ -436,6 +466,8 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   runningSamplesNo_(6,0) 
 {
   //now do what ever initialization is needed
+
+  firstTimeDigi_ = true;
 
   rhtree_ = fs_->make<TTree>("RHTree","RHTree"); 
 
@@ -496,6 +528,9 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histosProfile_["towet_vs_eta_reco"]->Sumw2();
   histosProfile_["towet_vs_eta_reco"]->SetXTitle("#eta");
   histosProfile_["towet_vs_eta_reco"]->SetYTitle("<Et>/#Delta#eta");
+  histos1D_["cas_towet"] = fs_->make<TH1D>("cas_towet","In Castor, Castor Tower Et",168000,-12000.0,72000.0);//96000,-12000.0,36000.0);
+  histos1D_["cas_towet"]->Sumw2();
+  histos1D_["cas_towet"]->SetXTitle("E_{t} (GeV)");
   histos2D_["tow_ene_map"] = fs_->make<TH2D>("tow_ene_map","ieta-iphi map of tower energies",199,-99.5,99.5,100,-0.5,99.5);
   histos2D_["tow_ene_map"]->SetXTitle("i#eta");
   histos2D_["tow_ene_map"]->SetYTitle("i#phi");
@@ -510,6 +545,7 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histosProfile_["genet_vs_eta_reco"]->Sumw2();
   histosProfile_["genet_vs_eta_reco"]->SetXTitle("#eta");
   histosProfile_["genet_vs_eta_reco"]->SetYTitle("<Et>/#Delta#eta");  
+  //
   etaBinEnergies_.reserve(ForwardRecord::nbEtaBins);
   etaBinEts_.reserve(ForwardRecord::nbEtaBins);
   etaBinTowEts_.reserve(ForwardRecord::nbEtaBins);
@@ -654,6 +690,8 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histos1D_["cas_etot1114bx"]->SetXTitle("E_{m11-14} (GeV)");
   histosProfile_["cas_zprofile"] = fs_->make<TProfile>("cas_zprofile","Profile of Castor intercalibrated RecHit responses along z",14,0.5,14.5);
   histosProfile_["cas_zprofile"]->SetXTitle("Longitudinal module number");
+  histosProfile_["cas_zprof_caliboff"] = fs_->make<TProfile>("cas_zprof_caliboff","Profile of Castor RH resp, z, no offline qual-calib",14,0.5,14.5);
+  histosProfile_["cas_zprof_caliboff"]->SetXTitle("Longitudinal module number");
   histosProfile_["cas_phiprofile"] = fs_->make<TProfile>("cas_phiprofile","Profile of Castor intercalibrated RecHit responses over #phi ",16,0.5,16.5);
   histosProfile_["cas_phiprofile"]->SetXTitle("Azimuthal sector number");
   histosProfile_["cas_phiprofile15"] = fs_->make<TProfile>("cas_phiprofile15","Profile of Castor intercalibrated RecHit responses over #phi in m1-5",16,0.5,16.5);
@@ -664,8 +702,31 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histosProfile_["cas_phiprofile1114"]->SetXTitle("Azimuthal sector number");
   histosProfile_["cas_chprofile"] = fs_->make<TProfile>("cas_chprofile","Castor intercalibrated RecHit responses in all channels",225,-0.5,224.5);
   histosProfile_["cas_chprofile"]->SetXTitle("Channel number");
-  histos1D_["cas_chno_satflg"] = fs_->make<TH1D>("cas_chno_satflg","No of Castor RecHits (0..positive), Saturation Flag (-1..negative)",449,-224.5,224.5);
+  histos1D_["cas_chno_satflg"] = fs_->make<TH1D>("cas_chno_satflg","No of Castor RecHits (225+0..225+positive), Saturation Flag (-1..negative), Re-Saturation Flag (0..224)",674,-224.5,449.5);
   histos1D_["cas_chno_satflg"]->Sumw2();
+
+  histos1D_["cas_ratio_em_to_tot"] = fs_->make<TH1D>("cas_ratio_em_to_tot","Ratio of EM to (EM + HAD) using Castor intercalibrated RecHits", 100, -0.1, 1.1);
+  histos1D_["cas_ratio_em_to_tot"]->Sumw2();
+  histos1D_["cas_ratio_em_to_tot"]->SetXTitle("EM/(EM + HAD)");
+  histosProfile_["cas_ratem2tot_vs_ntrk"] = fs_->make<TProfile>("cas_ratem2tot_vs_ntrk","Calibrated ratio, EM to (EM + HAD), vs Ntrk", 500,-0.5,499.5);
+  //histosProfile_["cas_ratem2tot_vs_ntrk"]->Sumw2();
+  histosProfile_["cas_ratem2tot_vs_ntrk"]->SetXTitle("Number of tracks");
+  histosProfile_["cas_ratem2tot_vs_ntrk"]->SetYTitle("EM/(EM + HAD)");
+  histos2D_["cas_em_vs_tot"] = fs_->make<TH2D>("cas_em_vs_tot","Castor EM vs (EM + HAD) using Castor intercalibrated RecHits",1800,-6000.0,12000.0,1800,-6000.0,12000.0);
+  histos2D_["cas_em_vs_tot"]->SetXTitle("(EM + HAD)");
+  histos2D_["cas_em_vs_tot"]->SetYTitle("EM");
+
+  histos1D_["cas_digi_chno_satflg"] = fs_->make<TH1D>("cas_digi_chno_satflg","No of Castor Digis (225+0..225+positive), Saturation Flag (-1..negative), time samples (0..224)",674,-224.5,449.5);
+  histos1D_["cas_digi_chno_satflg"]->Sumw2();
+  histos1D_["cas_digi_pulse"] = fs_->make<TH1D>("cas_digi_pulse","Castor digi pulse: <fC>",10,-0.5,9.5);
+  histos1D_["cas_digi_pulse"]->Sumw2();
+  histos1D_["cas_digi_ttp"] = fs_->make<TH1D>("cas_digi_ttp","Jet, RapGap, IsoEle, IsoMu TTP", 4,0.5,4.5);
+  histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(1,"Jet");
+  histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(2,"RapGap");
+  histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(3,"IsoEle");
+  histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(4,"IsoMu");
+
+  histos1D_["cas_digi_ttp"]->Sumw2();
 
   //zdcetotp/m //zdcemvshadp/m //zdcnhits //zdcsatflag //trk vs hf //hf vs cas //cas vs zdc
   histos1D_["zdc_chno_satflg"] = fs_->make<TH1D>("zdc_chno_satflg","No of ZDC RecHits (0..positive), Saturation Flag (-1..negative)",41,-20.5,20.5);
@@ -691,6 +752,70 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histos2D_["case_vs_zdcme"] = fs_->make<TH2D>("case_vs_zdcme", "Castor Energy vs ZDCM Energy", 5500,-110000.0,110000.0, 5500,-110000.0,110000.0);
   histos2D_["case_vs_zdcme"]->SetYTitle("E_{tot} (GeV)");
   histos2D_["case_vs_zdcme"]->SetXTitle("E^{-}_{tot} (GeV)");
+
+  histos1D_["incas_jet_energy_effdenom"] = fs_->make<TH1D>("incas_jet_energy_effdenom","All in Castor GenJet energies",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy_effdenom"]->Sumw2();
+  histos1D_["incas_jet_energy_effdenom"]->SetXTitle("E_{jet} (GeV)");
+  histos1D_["incas_jet_energy_th300_effpassing"] = fs_->make<TH1D>("incas_jet_energy_th300_effpassing","Castor GenJet energies given reco-tower>300",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy_th300_effpassing"]->Sumw2();
+  histos1D_["incas_jet_energy_th300_effpassing"]->SetXTitle("E_{jet} (GeV)");
+  histos1D_["incas_jet_energy_th300_eff"] = fs_->make<TH1D>("incas_jet_energy_th300_eff","Eff Castor GenJet energies given reco-tower>300",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy_th300_eff"]->Sumw2();
+  histos1D_["incas_jet_energy_th300_eff"]->SetXTitle("E_{jet} (GeV)");
+  histos1D_["incas_jet_energy_th500_effpassing"] = fs_->make<TH1D>("incas_jet_energy_th500_effpassing","Castor GenJet energies given reco-tower>500",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy_th500_effpassing"]->Sumw2();
+  histos1D_["incas_jet_energy_th500_effpassing"]->SetXTitle("E_{jet} (GeV)");
+  histos1D_["incas_jet_energy_th500_eff"] = fs_->make<TH1D>("incas_jet_energy_th500_eff","Eff Castor GenJet energies given reco-tower>500",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy_th500_eff"]->Sumw2();
+  histos1D_["incas_jet_energy_th500_eff"]->SetXTitle("E_{jet} (GeV)");
+  histos1D_["incas_jet_energy_th750_effpassing"] = fs_->make<TH1D>("incas_jet_energy_th750_effpassing","Castor GenJet energies given reco-tower>750",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy_th750_effpassing"]->Sumw2();
+  histos1D_["incas_jet_energy_th750_effpassing"]->SetXTitle("E_{jet} (GeV)");
+  histos1D_["incas_jet_energy_th750_eff"] = fs_->make<TH1D>("incas_jet_energy_th750_eff","Eff Castor GenJet energies given reco-tower>750",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy_th750_eff"]->Sumw2();
+  histos1D_["incas_jet_energy_th750_eff"]->SetXTitle("E_{jet} (GeV)");
+
+  histos1D_["max_jetgap_size_effdenom"] = fs_->make<TH1D>("max_jetgap_size_effdenom","Maximal gap size between Central and Castor jet",30,-15.0,15.0);
+  histos1D_["max_jetgap_size_effdenom"]->Sumw2();
+  histos1D_["max_jetgap_size_effdenom"]->SetXTitle("#Delta y");
+  histos1D_["max_jetgap_size_effpassing"] = fs_->make<TH1D>("max_jetgap_size_effpassing","Maximal jet gap size Central-Castor given reco jets",30,-15.0,15.0);
+  histos1D_["max_jetgap_size_effpassing"]->Sumw2();
+  histos1D_["max_jetgap_size_effpassing"]->SetXTitle("#Delta y");
+  histos1D_["max_jetgap_size_eff"] = fs_->make<TH1D>("max_jetgap_size_eff","Eff Maximal jet gap size Central-Castor given reco jets",30,-15.0,15.0);
+  histos1D_["max_jetgap_size_eff"]->Sumw2();
+  histos1D_["max_jetgap_size_eff"]->SetXTitle("#Delta y");
+  histosEff_["max_jetgap_size_eff_thXY"] = fs_->make<TEfficiency>("max_jetgap_size_eff_thXY","Eff Maximal jet gap size Central-Castor given reco calojet/cas-tower",30,-15.0,15.0);
+
+  /////gROOT->ProcessLine(".L scripts/tdrstyle.C");gROOT->ProcessLine("setTDRStyle()");gDirectory->cd("demo");gStyle->SetPadBottomMargin(2.20);gROOT->ForceStyle();
+  /////turn_on_casjetene_th300->Draw("AP")
+  /////gPad->Update();
+  /////turn_on_casjetene_th300->GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");
+  /////turn_on_casjetene_th300->GetPaintedGraph()->GetYaxis()->SetTitle("#varepsilon(CasTower > 300 GeV)");
+  /////turn_on_casjetene_th300->Draw("AP")
+  histosEff_["turn_on_casjetene_th300"] = fs_->make<TEfficiency>("turn_on_casjetene_th300","Eff GenJet energy in Castor given reco-tower>300",420,-12000.0,72000.0);
+  histosEff_["turn_on_casjetene_th300"]->SetTitle(";E_{genjet} (GeV);");//GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");
+  //eff_histo->SetStatisticOption(TEfficiency::kFCP); //--> this must be default?
+  //histosEff_["turn_on_casjetene_th300"]->Sumw2();
+  //histosEff_["turn_on_casjetene_th300"]->SetXTitle("E_{jet} (GeV)");
+  //histosEff_["turn_on_casjetene_th300"]->SetXTitle("#varepsilon");
+  histosEff_["turn_on_casjetene_th500"] = fs_->make<TEfficiency>("turn_on_casjetene_th500","Eff GenJet energy in Castor given reco-tower>500",420,-12000.0,72000.0);
+  histosEff_["turn_on_casjetene_th500"]->SetTitle(";E_{genjet} (GeV);");//GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");
+  histosEff_["turn_on_casjetene_th750"] = fs_->make<TEfficiency>("turn_on_casjetene_th750","Eff GenJet energy in Castor given reco-tower>750",420,-12000.0,72000.0);
+  histosEff_["turn_on_casjetene_th750"]->SetTitle(";E_{genjet} (GeV);");//GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");
+  //
+  //!!!Efficiency of matching to GenLevel!!!--> see https://indico.cern.ch/event/314963/contribution/1/material/slides/0.pdf
+  //!!!GenLevelCasJet# vs CastorBasicJet#
+  //!!!JetId basic variables: see Hauke's CMSweek presentation
+  //
+  histos1D_["cas_tow_ene"] = fs_->make<TH1D>("cas_tow_ene","Energy of individual castor towers",55,-1000.0,10000.0); //420,-12000.0,72000.0
+  histos1D_["cas_tow_ene"]->Sumw2();
+  histos1D_["cas_tow_ene"]->SetXTitle("E_{tower} (GeV)"); 
+  histos1D_["cas_jet_ene"] = fs_->make<TH1D>("cas_jet_ene","Energy of individual Basic Castor Jets",55,-1000.0,10000.0);
+  histos1D_["cas_jet_ene"]->Sumw2();
+  histos1D_["cas_jet_ene"]->SetXTitle("E_{jet} (GeV)");
+  histos1D_["calo_jet_pt"] = fs_->make<TH1D>("calo_jet_pt","Pt of individual CaloJets in some eta-range",1920,-120.0,360.0);
+  histos1D_["calo_jet_pt"]->Sumw2();
+  histos1D_["calo_jet_pt"]->SetXTitle("p_{t}(jet) / GeV");
 
 }
 
@@ -739,23 +864,25 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   // *************************** CASTOR RecHits ********************************
  
-
   edm::Handle<CastorRecHitCollection> casrechits;
   try{ iEvent.getByLabel("castorreco",casrechits); }
   catch(...) { edm::LogWarning(" CASTOR ") << " Cannot get Castor RecHits " << std::endl; }
 
   int nHitsIgnoreQualCalib = 0;
   int nFlagsIgnoreQualCalib = 0;
+  int nReFlagsIgnoreQualCalib = 0;
   int nhits = 0;
-  double energyCastor = 0;
-  double energyCastor15 = 0;
-  double energyCastor1114 = 0;
+  double energyCastor = 0.0;
+  double energyEmCastor = 0.0;
+  double energyCastor15 = 0.0;
+  double energyCastor1114 = 0.0;
   treeVariables_.nbCasRecHits = 0; 
   std::vector<double> sectorEnergyCastor(16,0.0);
   std::vector<double> sectorEnergyCastor15(16,0.0);
   std::vector<double> sectorEnergyCastor15IgnoreQualCalib(16,0.0);
   std::vector<double> sectorEnergyCastor1114(16,0.0);
   std::vector<double> moduleEnergyCastor(14,0.0);
+  std::vector<double> moduleEnergyCastorIgnoreQualCalib(14,0.0);
   if(casrechits.failedToGet()!=0 || !casrechits.isValid()) {
     edm::LogWarning(" CASTOR ") << " Cannot read CastorRecHitCollection" << std::endl;
   } else {
@@ -785,6 +912,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if(mod>0 && mod<6) sectorEnergyCastor15[sec-1] += corrFactor * rh.energy();
         if(mod>10 && mod<15) sectorEnergyCastor1114[sec-1] += corrFactor * rh.energy();
         moduleEnergyCastor[mod-1] += corrFactor * rh.energy();    
+        if(mod>0 && mod<3) energyEmCastor += corrFactor * rh.energy(); 
         if(mod>0 && mod<6) energyCastor15 += corrFactor * rh.energy();
         if(mod>10 && mod<15) energyCastor1114 += corrFactor * rh.energy();
         histosProfile_["cas_chprofile"]->Fill(static_cast<double>(ich),corrFactor * rh.energy());
@@ -807,7 +935,9 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       if(ich >= 0 && ich <= 223) {
         if(mod>0 && mod<6) sectorEnergyCastor15IgnoreQualCalib[sec-1] += rh.energy(); //ignore both "offline" channel quality and calibration
+        moduleEnergyCastorIgnoreQualCalib[mod-1] += rh.energy(); //ignore both "offline" channel quality and calibration
         nFlagsIgnoreQualCalib += static_cast<int>( rh.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+        nReFlagsIgnoreQualCalib += static_cast<int>( rh.flagField(HcalCaloFlagLabels::UserDefinedBit0) ); 
         nHitsIgnoreQualCalib++;
       }
     } // end loop castor rechits
@@ -817,15 +947,21 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   histos1D_["cas_etot"]->Fill(energyCastor);
   histos1D_["cas_etot15"]->Fill(energyCastor15);
   histos1D_["cas_etot1114"]->Fill(energyCastor1114);
+  if(energyCastor15>1e-9) histos1D_["cas_ratio_em_to_tot"]->Fill(energyEmCastor/energyCastor15);
+  histos2D_["cas_em_vs_tot"]->Fill(energyCastor15,energyEmCastor); 
   for(uint ibin = 0; ibin < 16; ibin++) {
     histosProfile_["cas_phiprofile"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor[ibin]);
     histosProfile_["cas_phiprofile15"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor15[ibin]);
     histosProfile_["cas_phiprof15_caliboff"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor15IgnoreQualCalib[ibin]);
     histosProfile_["cas_phiprofile1114"]->Fill(static_cast<double>(ibin+1),sectorEnergyCastor1114[ibin]); 
   }
-  for(uint ibin = 0; ibin < 14; ibin++) histosProfile_["cas_zprofile"]->Fill(static_cast<double>(ibin+1),moduleEnergyCastor[ibin]);
-  histos1D_["cas_chno_satflg"]->Fill(static_cast<double>(nHitsIgnoreQualCalib));
+  for(uint ibin = 0; ibin < 14; ibin++) {
+    histosProfile_["cas_zprofile"]->Fill(static_cast<double>(ibin+1),moduleEnergyCastor[ibin]);
+    histosProfile_["cas_zprof_caliboff"]->Fill(static_cast<double>(ibin+1),moduleEnergyCastorIgnoreQualCalib[ibin]);
+  }
+  histos1D_["cas_chno_satflg"]->Fill(static_cast<double>(225+nHitsIgnoreQualCalib));
   histos1D_["cas_chno_satflg"]->Fill(-static_cast<double>(nFlagsIgnoreQualCalib+1));
+  histos1D_["cas_chno_satflg"]->Fill(static_cast<double>(nReFlagsIgnoreQualCalib));
 
   // *********************************** ZDC RecHits ******************************************
 
@@ -851,22 +987,22 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       int iside = zdcrechit.id().zside(); 
       int isect = zdcrechit.id().section();
       if (iside > 0) { //"+" and "-" were likely confused for ZDC
-         energyZDCzcas += zdcrechit.energy();
-         if (isect == 1) energyEmZDCzcas += zdcrechit.energy();
+	energyZDCzcas += zdcrechit.energy();
+	if (isect == 1) energyEmZDCzcas += zdcrechit.energy();
       }
       if (iside < 0) {
-         energyZDCzcasnot += zdcrechit.energy();
-         if (isect == 1) energyEmZDCzcasnot += zdcrechit.energy();
+	energyZDCzcasnot += zdcrechit.energy();
+	if (isect == 1) energyEmZDCzcasnot += zdcrechit.energy();
       }
       /*if (nZhits < 18) {
-         treeVariables_.nbZDCRecHits = nZhits + 1;
-         treeVariables_.zdcRecHitEnergy[nZhits] = zdcrechit.energy();
-         treeVariables_.zdcRecHitIside[nZhits] = zdcrechit.id().zside();
-         treeVariables_.zdcRecHitIsection[nZhits] = zdcrechit.id().section();
-         treeVariables_.zdcRecHitIchannel[nZhits] = zdcrechit.id().channel();
-         //#include "RecoLocalCalo/HcalRecAlgos/interface/HcalCaloFlagLabels.h"
-         treeVariables_.zdcRecHitSaturation[nZhits] = static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
-      }*/
+	treeVariables_.nbZDCRecHits = nZhits + 1;
+	treeVariables_.zdcRecHitEnergy[nZhits] = zdcrechit.energy();
+	treeVariables_.zdcRecHitIside[nZhits] = zdcrechit.id().zside();
+	treeVariables_.zdcRecHitIsection[nZhits] = zdcrechit.id().section();
+	treeVariables_.zdcRecHitIchannel[nZhits] = zdcrechit.id().channel();
+	//#include "RecoLocalCalo/HcalRecAlgos/interface/HcalCaloFlagLabels.h"
+	treeVariables_.zdcRecHitSaturation[nZhits] = static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
+	}*/
       nFlags += static_cast<int>( zdcrechit.flagField(HcalCaloFlagLabels::ADCSaturationBit) );
       nZhits++;
     } // enf of loop zdc rechits
@@ -968,13 +1104,14 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     edm::LogWarning(" generalTracks ") << " Cannot read TRACKS " << std::endl;
   }// end tracks
   histos1D_["track_no"]->Fill(static_cast<double>(trkNo));
-  
+  if(energyCastor15>1e-9) histosProfile_["cas_ratem2tot_vs_ntrk"]->Fill(static_cast<double>(trkNo),energyEmCastor/energyCastor15);
 
   // *********************************     HF RecHits ****************************
 
-
+  // edm::SortedCollection<HFRecHit,edm::StrictWeakOrdering<HFRecHit> >    "reducedHcalRecHits"        "hfreco"          "RECO"
   edm::Handle < HFRecHitCollection > hfrechits_h;
-  try{ iEvent.getByLabel("hfreco", hfrechits_h); }
+  edm::InputTag hfrechitlabel = edm::InputTag("reducedHcalRecHits",       "hfreco",          "RECO");
+  try{ iEvent.getByLabel(hfrechitlabel, hfrechits_h); } //hfreco
   catch(...) { edm::LogWarning(" HF ") << " Cannot get HF RecHits " << std::endl;  }
 
   const HFRecHitCollection *hfrechits = hfrechits_h.failedToGet()? 0 : &*hfrechits_h;
@@ -1070,7 +1207,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // *********************************     All (not only HF) Towers   ****************************
 
   edm::Handle<CaloTowerCollection> towers_h;
-  try{ iEvent.getByLabel("towerMaker", towers_h); }
+  try{ iEvent.getByLabel("towerMaker", towers_h); } 
   catch(...) { edm::LogWarning("CaloTowers ") << " Cannot get CaloTowers " << std::endl;  }
 
   const CaloTowerCollection *towers = towers_h.failedToGet()? 0 : &*towers_h;
@@ -1100,10 +1237,10 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   // ************************ PF Candidates (for now: all candidates without "noise" cuts)   ****************************
   // https://github.com/CmsHI/cmssw/blob/forest_53X_04/RecoHI/HiJetAlgos/plugins/ParticleTowerProducer.cc
   /*
-   edm::Handle<reco::PFCandidateCollection> inputsHandle; //particleFlowTmp
-   iEvent.getByLabel(src_, inputsHandle);
-   for(reco::PFCandidateCollection::const_iterator ci = inputsHandle->begin(); ci!=inputsHandle->end(); ++ci) {
-   const reco::PFCandidate& particle = *ci;}
+    edm::Handle<reco::PFCandidateCollection> inputsHandle; //particleFlowTmp
+    iEvent.getByLabel(src_, inputsHandle);
+    for(reco::PFCandidateCollection::const_iterator ci = inputsHandle->begin(); ci!=inputsHandle->end(); ++ci) {
+    const reco::PFCandidate& particle = *ci;}
   */
   
   edm::Handle<reco::PFCandidateCollection> pfCandidates_h;
@@ -1132,12 +1269,12 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //h_HF=6,        // HF tower identified as a hadron
       //egamma_HF=7    // HF tower identified as an EM particle		
       /*if(id != 4 && id != 5 && id != 6 && id != 7) add_particle = true;
-      if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
-      if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
-      if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
-      if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
-      if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
-      if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;*/
+	if(eta > 0.0 && eta < 1.4 && id == 4 && energy > 0.4) add_particle = true;
+	if(eta > 0.0 && eta < 1.4 && id == 5 && energy > 2.0) add_particle = true;
+	if(eta > 1.4 && eta < 3.2 && id == 4 && energy > 1.8) add_particle = true;
+	if(eta > 1.4 && eta < 3.2 && id == 5 && energy > 2.9) add_particle = true;
+	if(eta > 3.2 && eta < 5.0 && id == 6 && energy > 4.0) add_particle = true;
+	if(eta > 3.2 && eta < 5.0 && id == 7 && energy > 4.0) add_particle = true;*/
       if(add_particle) {
 	const uint ibin = histosProfile_["energy_vs_eta_reco"]->FindBin( eta );		
 	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinPFEts[ibin-1] += et;
@@ -1145,7 +1282,153 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
   }
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinPFEts_[ibin]->Fill(etaBinPFEts[ibin]);
-  
+
+  // ************************ Castor Digis ****************************
+  // ~/afswork/hiforest/CMSSW_5_3_8_HI/src/Analysis/GenAnalyser/src/GenAnalyser.cc
+
+  int nCasDigis = 0;
+  int nCasDigiFlags = 0;
+  int nCasTslices = 0;
+  int nCasPresamp = 0;
+  if (_DoCasDigi) {
+
+    bool okToDoDigi = true;
+
+    ///Type                           Module             Label     Process   
+    ///----------------------------------------------------------------------
+    ///HcalUnpackerReport             "castorDigis"      ""        "RECO"
+    
+    edm::Handle<CastorDigiCollection> castorDigis;
+
+    std::cout << " AAACasDigiStep1 " << std::endl;
+
+    try{ iEvent.getByLabel("castorDigis",castorDigis); } //iEvent.getByType(castorDigis) //iEvent.getByLabel("castorDigis",castorDigis)
+    catch(...) { edm::LogWarning(" CastorDigis ") << " Cannot get CastorDigis " << std::endl; }
+
+    //std::cout << " AAAcastorDigis.failedToGet(): " << castorDigis.failedToGet() << " castorDigis.isValid(): " << castorDigis.isValid() << std::endl;
+
+    if(castorDigis.failedToGet()==0 && castorDigis.isValid()) {
+
+      edm::ESHandle<CastorDbService> conditions;
+      try{ iSetup.get<CastorDbRecord>().get(conditions); } 
+      catch(...){ edm::LogWarning(" CastorConditions ") << " Cannot get CastorConditions " << std::endl; }
+
+      const CastorQIEShape* shape = 0;
+      if (conditions.product() !=0 ) {
+	shape = conditions->getCastorShape();
+      } else {
+	edm::LogVerbatim(" CastorQIEShape ") << " Empty CastorConditions pointer " << std::endl;
+      }
+
+      if(firstTimeDigi_)
+	{
+
+          //std::cout << " AAACasDigiStep2 " << std::endl;          
+          
+	  edm::ESHandle<CastorElectronicsMap> refEMap;
+	  try{ iSetup.get<CastorElectronicsMapRcd>().get(refEMap); }
+	  catch(...) { edm::LogWarning("CastorElectronicsMap") << " Cannot get CastorElectronicsMap " << std::endl;}
+	  const CastorElectronicsMap* myRefEMap = refEMap.product();
+	  std::vector<HcalGenericDetId> listEMap;
+	  if (myRefEMap == 0) {
+	    edm::LogVerbatim(" CastorElectronicsMap ") << " Empty CastorElectronicsMap " << std::endl;
+	    okToDoDigi = false;
+	  } else {
+	    listEMap = myRefEMap->allPrecisionId();
+	    for (std::vector<HcalGenericDetId>::const_iterator it = listEMap.begin(); it != listEMap.end(); it++)
+	      {
+		HcalGenericDetId mygenid(it->rawId());
+		if(mygenid.isHcalCastorDetId())
+		  {
+		    NewBunch a;
+		    HcalCastorDetId chanid(mygenid.rawId());
+		    a.detid = chanid;
+		    a.usedflag = false;
+		    //std::string type;
+		    //type = "CASTOR";
+		    for(int i = 0; i != 10; i++) ////// i != 20
+		      {
+			a.tsCapId[i] = 0;
+			a.tsAdc[i] = 0;
+			a.tsfC[i] = 0.0;
+		      }
+		    Bunches_.push_back(a);
+		  }
+	      }
+	  }
+
+	  firstTimeDigi_ = false;
+
+	}
+
+      if( castorDigis->size()>0 && okToDoDigi) {
+
+        //std::cout << " AAACasDigiStep3 " << std::endl;
+
+	if (_ShowDebug) edm::LogVerbatim(" CastorDigis ") << " CastorDigiCollection size: " << castorDigis->size() << std::endl;
+
+	int firstTS = 0; 
+	int lastTS  = 9;
+
+	std::vector<NewBunch>::iterator bunch_it;
+
+	numBunches_ = 0;
+
+	int nsamples_min = 224;
+        int npresamp_min  = 224;
+	for(CastorDigiCollection::const_iterator j = castorDigis->begin(); j != castorDigis->end(); ++j)
+	  {
+
+            //std::cout << " AAACasDigiStep4 " << std::endl;
+
+	    const CastorDataFrame& digi = (const CastorDataFrame)(*j);
+	    if ( digi.size() < nsamples_min ) nsamples_min = digi.size();
+	    if ( digi.presamples() < npresamp_min ) npresamp_min = digi.presamples();
+	    if ( lastTS+1 > digi.size() ) lastTS = digi.size()-1; //digi.presamples()
+	    for(bunch_it = Bunches_.begin(); bunch_it != Bunches_.end(); bunch_it++)
+	      if(bunch_it->detid.rawId() == digi.id().rawId()) break; //find 1st entry with digi.id().rawId(), break "for", fill corresponding bunch_it
+	    bunch_it->usedflag = true;
+	    numBunches_++;
+	    for(int ts = firstTS; ts != lastTS+1; ts++){
+
+              //std::cout << " AAACasDigiStep5 " << std::endl;
+
+	      const CastorQIECoder* coder = conditions->getCastorCoder(digi.id().rawId());
+	      bunch_it->tsCapId[ts] = digi.sample(ts).capid();
+	      bunch_it->tsAdc[ts] = digi.sample(ts).adc(); //ADC
+	      double charge1;
+	      if(shape != 0) { charge1 = coder->charge(*shape, digi.sample(ts).adc(), digi.sample(ts).capid());  //fC
+	      } else { edm::LogVerbatim(" Charge Shape ") << " Empty Castor Shape pointer " << std::endl;
+		exit(1); 
+	      }
+	      bunch_it->tsfC[ts] = charge1; // pedestal not subtracted
+	      histos1D_["cas_digi_pulse"]->Fill(static_cast<double>(ts),charge1);
+              nCasDigiFlags += static_cast<int>(bunch_it->tsAdc[ts] >= 127);
+              //histos1D_["cas_digi_chno_satflg"]//"No of Castor Digis (225+0..225+positive), Saturation Flag (-1..negative), time samples (0..224)"
+	      //h_saturationset_sect_[bunch_it->detid.sector()-1]
+	      //	->Fill(static_cast<double>(10*(bunch_it->detid.module()-1)+ts),
+	      //	       static_cast<int>(bunch_it->tsAdc[ts] >= 127) ); //NON-pedestal-subtracted
+	      
+	    } // end loop over ts
+
+	    nCasTslices = nsamples_min;
+            nCasPresamp = npresamp_min;
+	    
+	  } // loop over digi collection
+
+	nCasDigis = numBunches_;
+
+      } //end if size of digis > 0 && e-map ok
+
+    } //end if not failed to get digis
+
+  } //end if to do digis at all
+
+  histos1D_["cas_digi_chno_satflg"]->Fill(static_cast<double>(225+nCasDigis));
+  histos1D_["cas_digi_chno_satflg"]->Fill(-static_cast<double>(nCasDigiFlags+1));
+  histos1D_["cas_digi_chno_satflg"]->Fill(static_cast<double>(nCasTslices));
+  histos1D_["cas_digi_chno_satflg"]->Fill(static_cast<double>(nCasPresamp));
+
   // ************************ GenParticles ****************************
   
   if(!isData){
@@ -1211,7 +1494,149 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       vtxTrkNo = pv.tracksSize();
     }
   }
-  
+
+  // ******************************
+
+
+  double etTowerCastor = 0.0;    
+  if (_DoAdvanced) {
+
+    // ************ Castor Towers
+    edm::Handle<reco::CastorTowerCollection> ctowers;
+    try{
+      iEvent.getByLabel("CastorTowerReco",ctowers);  
+    } catch(...) {
+      edm::LogWarning(" CastorTowers ") << " Cannot get CastorTowers " << std::endl;
+    }
+
+    // ************ GenJets
+    //vector<reco::GenJet>                  "ak5GenJets"                ""                "SIM"
+    //https://github.com/UAEDF/UATree/blob/master/UABaseTree/src/GetGenJet.cc
+    edm::Handle<reco::GenJetCollection> genjets;
+    try{
+      iEvent.getByLabel("ak7GenJets", genjets); //ak5GenJets
+    } catch(...) {
+      edm::LogWarning(" GenJets ") << " Cannot get GenJets " << std::endl;
+    }
+
+    // ************ CaloJets
+    //https://cmssdt.cern.ch/SDT/lxr/source/RecoJets/JetAnalyzers/src/JetValidation.cc
+    //vector<reco::CaloJet>                 "ak5CaloJets"               ""                "RECO"
+    edm::Handle<reco::CaloJetCollection> caljets;
+    try{
+      iEvent.getByLabel("ak5CaloJets",caljets);  //un-corrected jets???
+    } catch(...) {
+      edm::LogWarning(" CaloJets ") << " Cannot get CaloJets " << std::endl;
+    }
+
+    // ************ Castor Jets
+    // https://twiki.cern.ch/twiki/bin/view/CMS/CastorReco#Accessing_reconstructed_CASTOR_d
+    // https://github.com/UAEDF/UATree/blob/master/UABaseTree/src/GetCastorJet.cc
+    edm::Handle<edm::View< reco::BasicJet > > basicjetcoll; //-- uncorrected jets
+    try{
+      iEvent.getByLabel("ak7BasicJets",basicjetcoll); //castorjets_
+    } catch(...) {
+      edm::LogWarning(" CastorJets ") << " Cannot get CastorJets " << std::endl;
+    }
+
+    edm::Handle<reco::CastorJetIDValueMap> jetIdMap;
+    try{
+      iEvent.getByLabel("ak7CastorJetID",jetIdMap); //castorjetid_
+    } catch(...) {
+      edm::LogWarning(" CastorJetsId ") << " Cannot get CastorJetsId " << std::endl;
+    }
+
+    //'Emulation' of a Castor trigger on energy above threshold in a sector
+    bool isCasTowEneGT300 = false;
+    bool isCasTowEneGT500 = false;
+    bool isCasTowEneGT750 = false;
+    if(ctowers.isValid() && ctowers.failedToGet() == 0) { 
+      for(unsigned icand=0;icand<ctowers->size(); icand++) {
+	const reco::CastorTower ctower = ctowers->at(icand);
+        etTowerCastor += ctower.et();
+	if (_ShowDebug) edm::LogVerbatim("CastorTowers") << "Castor tower energy = " << ctower.energy() << " eta = " << ctower.eta() << " phi = " << ctower.phi() << std::endl;
+        histos1D_["cas_tow_ene"]->Fill(ctower.energy());
+	if (ctower.energy() > 300.0) isCasTowEneGT300 = true;
+	if (ctower.energy() > 500.0) isCasTowEneGT500 = true;
+	if (ctower.energy() > 750.0) isCasTowEneGT750 = true;
+	if (isCasTowEneGT300 && isCasTowEneGT500 && isCasTowEneGT750) break;
+      }
+    }
+
+    //RECO level BasicCastorJet above a threshold  
+    bool isBasCasJetEneGT400 = false;
+    //bool isBasCasJetEneGT1000 = false;
+    if (basicjetcoll.isValid() && basicjetcoll.failedToGet() == 0) {
+      for(edm::View<reco::BasicJet>::const_iterator ibegin = basicjetcoll->begin(), iend = basicjetcoll->end(), ijet = ibegin; ijet != iend; ++ijet) {
+	unsigned int idx = ijet - ibegin;
+	const reco::BasicJet & basicjet = (*basicjetcoll)[idx];
+	if (_ShowDebug) edm::LogVerbatim("BasicJets") << "Castor jet energy = " << basicjet.energy() << " eta = " << basicjet.eta() << " phi = " << basicjet.phi() << std::endl;
+        histos1D_["cas_jet_ene"]->Fill(basicjet.energy());
+	edm::RefToBase<reco::BasicJet> jetRef = basicjetcoll->refAt(idx);
+	reco::CastorJetID const & jetId = (*jetIdMap)[jetRef];
+	if (_ShowDebug) edm::LogVerbatim("BasicJets") << "Castor jet id fem =  " <<  jetId.fem << " eem = " << jetId.emEnergy << " ehad = " << jetId.hadEnergy << " width = " << jetId.width << " depth = " << jetId.depth << " fhot = " << jetId.fhot << " sigmaz = " << jetId.sigmaz << " ntower = " << jetId.nTowers << std::endl;
+	if (basicjet.energy() > 400.0) {
+	  isBasCasJetEneGT400 = true; 
+	  break;
+	}
+	//if (basicjet.energy() > 1000.0) isBasCasJetEneGT1000 = true;
+	//if (isBasCasJetEneGT500 && isBasCasJetEneGT1000) break;
+	//if (basicjet.energy() > 1000.0) isBasicCastorJetAbove1000 = true;
+	//if (isBasicCastorJetAbove500 && isBasicCastorJetAbove1000) break;
+      }
+    }
+
+    //RECO level CentralJet above a threshold 
+    bool isCenJetPtGT20 = false; //you worked with fwd-samples, so central jet here should mean HF jet
+    if (caljets.isValid() && caljets.failedToGet() == 0) {
+      for(reco::CaloJetCollection::const_iterator i_caljet = caljets->begin(); i_caljet != caljets->end(); ++i_caljet) {
+	if (_ShowDebug) edm::LogVerbatim("CaloJets") << "CaloJets ene = " << i_caljet->energy() << " pt = " << i_caljet->pt() << " eta = " << i_caljet->eta() << " phi = " << i_caljet->phi() << std::endl;
+        histos1D_["calo_jet_pt"]->Fill(i_caljet->pt());
+	if (i_caljet->pt()>20.0 && abs(i_caljet->eta())>3.0 && abs(i_caljet->eta())<5.0) {
+	  isCenJetPtGT20 = true;
+	  break;
+	}
+      }  
+    }
+
+    //Loop over GenJets
+    //https://indico.cern.ch/event/314963/contribution/1/material/0/0.txt
+    double inCenEtaMax = -10.0;
+    bool inCenEtaMaxSet = false;
+    double inCasEtaMin = 10.0;
+    bool inCasEtaMinSet = false;
+    if(genjets.isValid() && genjets.failedToGet() == 0) { 
+      for(reco::GenJetCollection::const_iterator genjet = genjets->begin() ; genjet != genjets->end() ; ++genjet ){
+	if (_ShowDebug) edm::LogVerbatim("GenJets") << "GenJets px = " << genjet->px() << " py = " << genjet->py() << " pz = " << genjet->pz() << " ene = " << genjet->energy() << " eta = " << genjet->eta() << std::endl;
+	double eta = genjet->eta();
+	if (abs(eta)>3 && abs(eta)<5 && genjet->pt()>25.0 && eta>inCenEtaMax) {
+	  inCenEtaMax = eta;
+	  inCenEtaMaxSet = true;
+	}
+	if (eta>-6.6 && eta<-5.2 && genjet->energy()>500. && eta<inCasEtaMin) {
+	  inCasEtaMin = eta;
+	  inCasEtaMinSet = true;
+ 	}
+	if (genjet->eta()<-6.6 || genjet->eta()>-5.2) continue;
+	histos1D_["incas_jet_energy_effdenom"]->Fill(genjet->energy());
+	if (isCasTowEneGT300) histos1D_["incas_jet_energy_th300_effpassing"]->Fill(genjet->energy());
+        histosEff_["turn_on_casjetene_th300"]->Fill(isCasTowEneGT300,genjet->energy());
+	if (isCasTowEneGT500) histos1D_["incas_jet_energy_th500_effpassing"]->Fill(genjet->energy());
+        histosEff_["turn_on_casjetene_th500"]->Fill(isCasTowEneGT500,genjet->energy());   
+	if (isCasTowEneGT750) histos1D_["incas_jet_energy_th750_effpassing"]->Fill(genjet->energy());
+        histosEff_["turn_on_casjetene_th750"]->Fill(isCasTowEneGT750,genjet->energy());
+      }
+    }
+
+    if (inCenEtaMaxSet && inCasEtaMinSet) {
+      histos1D_["max_jetgap_size_effdenom"]->Fill(inCenEtaMax-inCasEtaMin);
+      if (isBasCasJetEneGT400 && isCenJetPtGT20) histos1D_["max_jetgap_size_effpassing"]->Fill(inCenEtaMax-inCasEtaMin);
+      histosEff_["max_jetgap_size_eff_thXY"]->Fill((isCenJetPtGT20 && isCasTowEneGT300),inCenEtaMax-inCasEtaMin);
+    }
+
+  }
+  histos1D_["cas_towet"]->Fill(etTowerCastor);
+
   // ******************************
 
   histos2D_["trkno_vs_hfme"]->Fill(hfmE,static_cast<double>(trkNo));
@@ -1262,8 +1687,10 @@ RHAnalyser::endJob()
   for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) {
     double width = fabs(ForwardRecord::Eta_Bin_Edges[ibin+1]-ForwardRecord::Eta_Bin_Edges[ibin]);
     double bincenter = (ForwardRecord::Eta_Bin_Edges[ibin+1]+ForwardRecord::Eta_Bin_Edges[ibin])/2.0;
-    if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << "MEAN-e: " << etaBinEnergies_[ibin]->GetMean(1) << "MEAN-et: " << etaBinEts_[ibin]->GetMean(1) << " Width: " << width << std::endl;
+    if (_ShowDebug) edm::LogVerbatim(" OUT!!! ") << "etaBinEnergies MEAN-e: " << etaBinEnergies_[ibin]->GetMean(1) << " MEAN-et: " << etaBinEts_[ibin]->GetMean(1) << " Width: " << width << std::endl;
     if(width > 1e-9) {
+      histosProfile_["genet_vs_eta_reco"]->Fill(bincenter,etaBinGenEts_[ibin]->GetMean(1)/width);
+      if (fabs(bincenter) > 5.0) continue; //in data Castor is to be filled separately hopefully fixing the bug which mentioned below
       histosProfile_["energy_vs_eta_reco"]->Fill(bincenter,etaBinEnergies_[ibin]->GetMean(1)/width);
       //histosProfile_["energy_vs_eta_reco"]->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetMeanError(1)/width);
       histosProfile_["et_vs_eta_reco"]->Fill(bincenter,etaBinEts_[ibin]->GetMean(1)/width);
@@ -1276,6 +1703,12 @@ RHAnalyser::endJob()
     }
     //if(width > 1e-9) histosProfile_["energy_vs_eta_reco"]->SetBinError(ibin+1,etaBinEnergies_[ibin]->GetRMS(1)/width);
   }
+  //Add here Castor separately from other energy bins; bin width not(!) as in booked histogram; 
+  //there is one additional bin between HF and Castor (not to be filled here at reco-level):
+  //BUG HERE (and also ABOVE???): <cas_etot>/1.41 ~ 631, you fill it here and get as profile
+  //value ~315 which is in fact (0  + 631) / 2, so it averages with the initial zero
+  histosProfile_["energy_vs_eta_reco"]->Fill( -5.9 , histos1D_["cas_etot"]->GetMean(1) / fabs(-6.6+5.19) );
+  histosProfile_["towet_vs_eta_reco"]->Fill( -5.9, histos1D_["cas_towet"]->GetMean(1) / fabs(-6.6+5.19) );
   for(int i1 = 0; i1 < 6; i1++) {
     /*hf_resp_->SetBinContent(i1+1, //do not do the division here: will merge many files later
       runningSampleEnergySum_[i1] / static_cast<double>(runningSamplesNo_[i1])
@@ -1283,6 +1716,10 @@ RHAnalyser::endJob()
     histos1D_["hf_resp_accum"]->SetBinContent(i1+1, runningSampleEnergySum_[i1] );   
     histos1D_["hf_resp_occup_accum"]->SetBinContent(i1+1, static_cast<double>(runningSamplesNo_[i1]) );
   }
+  histos1D_["incas_jet_energy_th300_eff"]->Divide(histos1D_["incas_jet_energy_th300_effpassing"],histos1D_["incas_jet_energy_effdenom"],1.0,1.0); 
+  histos1D_["incas_jet_energy_th500_eff"]->Divide(histos1D_["incas_jet_energy_th500_effpassing"],histos1D_["incas_jet_energy_effdenom"],1.0,1.0);
+  histos1D_["incas_jet_energy_th750_eff"]->Divide(histos1D_["incas_jet_energy_th750_effpassing"],histos1D_["incas_jet_energy_effdenom"],1.0,1.0);
+  histos1D_["max_jetgap_size_eff"]->Divide(histos1D_["max_jetgap_size_effpassing"],histos1D_["max_jetgap_size_effdenom"],1.0,1.0);
 
 }
 
