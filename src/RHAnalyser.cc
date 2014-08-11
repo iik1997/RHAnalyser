@@ -96,6 +96,12 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+//trigger
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+
 // ROOT
 #include "TROOT.h"
 #include "TTree.h"
@@ -296,7 +302,14 @@ private:
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
+  virtual bool isMatchedWithGen(reco::BasicJet const&, std::vector<reco::GenJet> const&);//const reco::GenParticleCollection); //(const reco::GenParticle, trigger::TriggerObjectCollection);  
+  virtual bool isMatchedWithGen(reco::BasicJet const&, reco::GenJet const&); //pass leading basic and gen jets here
+
   // ----------member data ---------------------------
+
+  HLTConfigProvider hltConfig_;
+  int triggerBit_;
+  
 
   struct MonVariables
   {
@@ -369,6 +382,7 @@ private:
 
   const CaloGeometry* geo;
 
+  bool _DoTrigger;
   bool _DoCasDigi;
   bool _DoAdvanced;
   bool _ShowDebug;
@@ -450,6 +464,7 @@ private:
 // constructors and destructor
 //
 RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
+  _DoTrigger ( iConfig.getUntrackedParameter<bool>("doTrigger",true) ),
   _DoCasDigi ( iConfig.getUntrackedParameter<bool>("doCasDigi",false) ), 
   _DoAdvanced ( iConfig.getUntrackedParameter<bool>("doAdvanced",false) ),
   //execute castor- and central-jet related code
@@ -720,12 +735,11 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histos1D_["cas_digi_chno_satflg"]->Sumw2();
   histos1D_["cas_digi_pulse"] = fs_->make<TH1D>("cas_digi_pulse","Castor digi pulse: <fC>",10,-0.5,9.5);
   histos1D_["cas_digi_pulse"]->Sumw2();
-  histos1D_["cas_digi_ttp"] = fs_->make<TH1D>("cas_digi_ttp","Jet, RapGap, IsoEle, IsoMu TTP", 4,0.5,4.5);
+  histos1D_["cas_digi_ttp"] = fs_->make<TH1D>("cas_digi_ttp","Jet, RapGap, IsoEle, IsoMu TTP", 20,0.5,20.5);//use X-axis labels also as a means to store strings (trig-menu, tag etc)
   histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(1,"Jet");
   histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(2,"RapGap");
   histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(3,"IsoEle");
-  histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(4,"IsoMu");
-
+  histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(4,"IsoMu");//carefull: bin 5 label is specified later in the code
   histos1D_["cas_digi_ttp"]->Sumw2();
 
   //zdcetotp/m //zdcemvshadp/m //zdcnhits //zdcsatflag //trk vs hf //hf vs cas //cas vs zdc
@@ -775,23 +789,24 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histos1D_["incas_jet_energy_th750_eff"]->Sumw2();
   histos1D_["incas_jet_energy_th750_eff"]->SetXTitle("E_{jet} (GeV)");
 
-  histos1D_["max_jetgap_size_effdenom"] = fs_->make<TH1D>("max_jetgap_size_effdenom","Maximal gap size between Central and Castor jet",30,-15.0,15.0);
+  histos1D_["max_jetgap_size_effdenom"] = fs_->make<TH1D>("max_jetgap_size_effdenom","Maximal gap size between Central and Castor genjet",30,-15.0,15.0);
   histos1D_["max_jetgap_size_effdenom"]->Sumw2();
   histos1D_["max_jetgap_size_effdenom"]->SetXTitle("#Delta y");
-  histos1D_["max_jetgap_size_effpassing"] = fs_->make<TH1D>("max_jetgap_size_effpassing","Maximal jet gap size Central-Castor given reco jets",30,-15.0,15.0);
+  histos1D_["max_jetgap_size_effpassing"] = fs_->make<TH1D>("max_jetgap_size_effpassing","Maximal jet gengap size Central-Castor given reco jets",30,-15.0,15.0);
   histos1D_["max_jetgap_size_effpassing"]->Sumw2();
   histos1D_["max_jetgap_size_effpassing"]->SetXTitle("#Delta y");
-  histos1D_["max_jetgap_size_eff"] = fs_->make<TH1D>("max_jetgap_size_eff","Eff Maximal jet gap size Central-Castor given reco jets",30,-15.0,15.0);
+  histos1D_["max_jetgap_size_eff"] = fs_->make<TH1D>("max_jetgap_size_eff","Eff Maximal genjet gap size Central-Castor given reco jets",30,-15.0,15.0);
   histos1D_["max_jetgap_size_eff"]->Sumw2();
   histos1D_["max_jetgap_size_eff"]->SetXTitle("#Delta y");
-  histosEff_["max_jetgap_size_eff_thXY"] = fs_->make<TEfficiency>("max_jetgap_size_eff_thXY","Eff Maximal jet gap size Central-Castor given reco calojet/cas-tower",30,-15.0,15.0);
+  histosEff_["max_jetgap_size_eff_thXY"] = fs_->make<TEfficiency>("max_jetgap_size_eff_thXY","Eff Maximal genjet gap size Central-Castor given reco calojet/cas-tower",30,-15.0,15.0);
+  histosEff_["max_pargap_size_eff_thXY"] = fs_->make<TEfficiency>("max_pargap_size_eff_thXY","Eff Maximal genpart gap size in Castor given no fired cas-tower",150,-15.0,15.0);
+  histos1D_["incas_partgap_size"] = fs_->make<TH1D>("incas_partgap_size","Maximal genpart gap size in Castor",150,-15.0,15.0);  
+  histos1D_["incas_partgap_size"]->Sumw2();
+  histos1D_["incas_partgap_size"]->SetXTitle("#Delta#eta");
+  
 
   /////gROOT->ProcessLine(".L scripts/tdrstyle.C");gROOT->ProcessLine("setTDRStyle()");gDirectory->cd("demo");gStyle->SetPadBottomMargin(2.20);gROOT->ForceStyle();
-  /////turn_on_casjetene_th300->Draw("AP")
-  /////gPad->Update();
-  /////turn_on_casjetene_th300->GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");
-  /////turn_on_casjetene_th300->GetPaintedGraph()->GetYaxis()->SetTitle("#varepsilon(CasTower > 300 GeV)");
-  /////turn_on_casjetene_th300->Draw("AP")
+  /////turn_on_casjetene_th300->Draw("AP");gPad->Update();turn_on_casjetene_th300->GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");turn_on_casjetene_th300->GetPaintedGraph()->GetYaxis()->SetTitle("#varepsilon(CasTower > 300 GeV)");turn_on_casjetene_th300->Draw("AP")
   histosEff_["turn_on_casjetene_th300"] = fs_->make<TEfficiency>("turn_on_casjetene_th300","Eff GenJet energy in Castor given reco-tower>300",420,-12000.0,72000.0);
   histosEff_["turn_on_casjetene_th300"]->SetTitle(";E_{genjet} (GeV);");//GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");
   //eff_histo->SetStatisticOption(TEfficiency::kFCP); //--> this must be default?
@@ -804,15 +819,51 @@ RHAnalyser::RHAnalyser(const edm::ParameterSet& iConfig) :
   histosEff_["turn_on_casjetene_th750"]->SetTitle(";E_{genjet} (GeV);");//GetPaintedGraph()->GetXaxis()->SetTitle("E_{genjet} (GeV)");
   //
   //!!!Efficiency of matching to GenLevel!!!--> see https://indico.cern.ch/event/314963/contribution/1/material/slides/0.pdf
+  histosEff_["turn_on_casbasjetene_match"] = fs_->make<TEfficiency>("turn_on_casbasjetene_match","Eff BasicJet energy in Castor given match to GenJet",420,-12000.0,72000.0);
+  histosEff_["turn_on_casbasjetene_match"]->SetTitle(";E_{basjet} (GeV);");
+  histosEff_["turn_on_casleadbasjetene_match"] = fs_->make<TEfficiency>("turn_on_casleadbasjetene_match","Eff Leading BasicJet energy in Castor given match to Leading GenJet",420,-12000.0,72000.0);
+  histosEff_["turn_on_casleadbasjetene_match"]->SetTitle(";E_{basjet} (GeV);");
   //!!!GenLevelCasJet# vs CastorBasicJet#
   //!!!JetId basic variables: see Hauke's CMSweek presentation
   //
+  histos1D_["incas_jet_energy"] = fs_->make<TH1D>("incas_jet_energy","Energy of individual GenJets in Castor",420,-12000.0,72000.0);
+  histos1D_["incas_jet_energy"]->Sumw2();
+  histos2D_["incas_genjetno_vs_basjetno"] = fs_->make<TH2D>("incas_genjetno_vs_basjetno","Number of GenJets in Castor vs number of Basic Castor Jets",10,-0.5,9.5,10,-0.5,9.5);
+  histos2D_["incas_genjetno_vs_basjetno"]->SetXTitle("Number of Basic Castor Jets");
+  histos2D_["incas_genjetno_vs_basjetno"]->SetYTitle("Number of GenJets in Castor");
+
   histos1D_["cas_tow_ene"] = fs_->make<TH1D>("cas_tow_ene","Energy of individual castor towers",55,-1000.0,10000.0); //420,-12000.0,72000.0
   histos1D_["cas_tow_ene"]->Sumw2();
   histos1D_["cas_tow_ene"]->SetXTitle("E_{tower} (GeV)"); 
   histos1D_["cas_jet_ene"] = fs_->make<TH1D>("cas_jet_ene","Energy of individual Basic Castor Jets",55,-1000.0,10000.0);
   histos1D_["cas_jet_ene"]->Sumw2();
   histos1D_["cas_jet_ene"]->SetXTitle("E_{jet} (GeV)");
+  
+  histos1D_["cas_jet_fem"] = fs_->make<TH1D>("cas_jet_fem","CastorJetId, fraction of em-emergy, fEm = em/tot",120, -0.1, 1.1);
+  histos1D_["cas_jet_fem"]->Sumw2();
+  histosProfile_["cas_jet_fem_vs_basjete"] = fs_->make<TProfile>("cas_jet_fem_vs_basjete","Profile of CastorJetId-fem vs basic castor jet energy",55,-1000.0,10000.0); //420,-12000.0,72000.0);
+  histosProfile_["cas_jet_fem_vs_basjete"]->SetXTitle("E_{basjet} (GeV)");
+  histos1D_["cas_jet_width"] = fs_->make<TH1D>("cas_jet_width","CastorJetId, width",50,0.0,0.5);
+  histos1D_["cas_jet_width"]->Sumw2();
+  histosProfile_["cas_jet_width_vs_basjete"] = fs_->make<TProfile>("cas_jet_width_vs_basjete","Profile of CastorJetId-width vs basic castor jet energy",55,-1000.0,10000.0); //420,-12000.0,72000.0);
+  histosProfile_["cas_jet_width_vs_basjete"]->SetXTitle("E_{basjet} (GeV)");
+  histos1D_["cas_jet_depth"] = fs_->make<TH1D>("cas_jet_depth","CastorJetId, depth",70,-15000.0,-14300.0);
+  histos1D_["cas_jet_depth"]->Sumw2();
+  histosProfile_["cas_jet_depth_vs_basjete"] = fs_->make<TProfile>("cas_jet_depth_vs_basjete","Profile of CastorJetId-depth vs basic castor jet energy",55,-1000.0,10000.0); //420,-12000.0,72000.0);
+  histosProfile_["cas_jet_depth_vs_basjete"]->SetXTitle("E_{basjet} (GeV)");
+  histos1D_["cas_jet_fhot"] = fs_->make<TH1D>("cas_jet_fhot","CastorJetId, fraction of energy in hottest ch, hot/tot",120, -0.1, 1.1);
+  histos1D_["cas_jet_fhot"]->Sumw2();
+  histosProfile_["cas_jet_fhot_vs_basjete"] = fs_->make<TProfile>("cas_jet_fhot_vs_basjete","Profile of CastorJetId-fhot vs basic castor jet energy",55,-1000.0,10000.0); //420,-12000.0,72000.0);
+  histosProfile_["cas_jet_fhot_vs_basjete"]->SetXTitle("E_{basjet} (GeV)");
+  histos1D_["cas_jet_sigmaz"] = fs_->make<TH1D>("cas_jet_sigmaz","CastorJetId, #sigma_z",30,0.0,300.0);
+  histos1D_["cas_jet_sigmaz"]->Sumw2();
+  histosProfile_["cas_jet_sigmaz_vs_basjete"] = fs_->make<TProfile>("cas_jet_sigmaz_vs_basjete","Profile of CastorJetId-sigmaz vs basic castor jet energy",55,-1000.0,10000.0); //420,-12000.0,72000.0);
+  histosProfile_["cas_jet_sigmaz_vs_basjete"]->SetXTitle("E_{basjet} (GeV)");
+  histos1D_["cas_jet_ntowers"] = fs_->make<TH1D>("cas_jet_ntowers","CastorJetId, no of merged castor towers",17,-0.5,16.5);
+  histos1D_["cas_jet_ntowers"]->Sumw2();
+  histosProfile_["cas_jet_ntowers_vs_basjete"] = fs_->make<TProfile>("cas_jet_ntowers_vs_basjete","Profile of CastorJetId-ntowers vs basic castor jet energy",55,-1000.0,10000.0); //420,-12000.0,72000.0);
+  histosProfile_["cas_jet_ntowers_vs_basjete"]->SetXTitle("E_{basjet} (GeV)");
+  
   histos1D_["calo_jet_pt"] = fs_->make<TH1D>("calo_jet_pt","Pt of individual CaloJets in some eta-range",1920,-120.0,360.0);
   histos1D_["calo_jet_pt"]->Sumw2();
   histos1D_["calo_jet_pt"]->SetXTitle("p_{t}(jet) / GeV");
@@ -861,6 +912,47 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   treeVariables_.lumiNb = iEvent.luminosityBlock() ;
 
   uint bx = iEvent.bunchCrossing() ;
+
+  //trigger::TriggerEvent                 "hltTriggerSummaryAOD"      ""                "HLT"
+  //edm::TriggerResults                   "TriggerResults"            ""                "SIM"     
+  //edm::TriggerResults                   "TriggerResults"            ""                "HLT"     
+  //edm::TriggerResults                   "TriggerResults"            ""                "RECO"
+  if (_DoTrigger) {   
+    
+    /*edm::InputTag triggerSummaryLabel_ = edm::InputTag("hltTriggerSummaryAOD", "", "HLT"); //HLT2
+    edm::Handle<trigger::TriggerEvent> triggerSummary;
+    try{ iEvent.getByLabel(triggerSummaryLabel_, triggerSummary); }
+    catch(...) { edm::LogWarning(" TriggerEvent ") << " Cannot get TriggerEvent " << std::endl;  }*/
+
+    /* //TOKENS!!!
+    edm::EDGetTokenT<TriggerResults> tok_trigger;
+    Handle<TriggerResults> trh;
+    iEvent.getByToken(tok_trigger, trh);*/
+    edm::InputTag triggerResultsLabel = edm::InputTag("TriggerResults", "", "HLT");
+    edm::Handle<edm::TriggerResults> triggerResults;
+    try{ iEvent.getByLabel(triggerResultsLabel, triggerResults); }
+    catch(...) {  edm::LogWarning(" TriggerResults ") << " Cannot get TriggerResults " << std::endl; }
+    
+    bool changedConfig = false;    
+    if (!hltConfig_.init(iEvent.getRun(), iSetup, "HLT", changedConfig)) {
+      edm::LogWarning(" hltConfig ") << "Initialization of HLTConfigProvider failed!!" << std::endl;      
+      return;
+    }
+    if (changedConfig){
+      if (_ShowDebug) edm::LogVerbatim(" hltConfig ") << " The current Menu is " << hltConfig_.tableName() << std::endl;
+      histos1D_["cas_digi_ttp"]->GetXaxis()->SetBinLabel(5,hltConfig_.tableName().c_str());
+      triggerBit_ = -1;
+      for (size_t j = 0; j < hltConfig_.triggerNames().size(); j++) {
+	std::pair<int,int> psValueCombo =  hltConfig_.prescaleValues(iEvent, iSetup, hltConfig_.triggerNames()[j]); //hltPath
+	//if ( (psValueCombo.first > 0) && (psValueCombo.second > 0) )
+	if (TString(hltConfig_.triggerNames()[j]).Contains("HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL"))  triggerBit_ = j;
+        if (_ShowDebug && triggerResults.isValid() && triggerResults.failedToGet()==0) edm::LogVerbatim(" hltConfig ") << " Name: " << hltConfig_.triggerNames()[j] << " accept: " << triggerResults->accept(j) << " , L1 pre-scale: " << psValueCombo.first << " , HLT prescale: " << psValueCombo.second << std::endl;
+      }
+      if (triggerBit_ == -1) edm::LogWarning(" hltConfig ") << "Reference HLT path not found" << std::endl;
+      
+    }
+    
+  }
 
   // *************************** CASTOR RecHits ********************************
  
@@ -1300,7 +1392,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     edm::Handle<CastorDigiCollection> castorDigis;
 
-    std::cout << " AAACasDigiStep1 " << std::endl;
+    //std::cout << " AAACasDigiStep1 " << std::endl;
 
     try{ iEvent.getByLabel("castorDigis",castorDigis); } //iEvent.getByType(castorDigis) //iEvent.getByLabel("castorDigis",castorDigis)
     catch(...) { edm::LogWarning(" CastorDigis ") << " Cannot get CastorDigis " << std::endl; }
@@ -1430,8 +1522,17 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   histos1D_["cas_digi_chno_satflg"]->Fill(static_cast<double>(nCasPresamp));
 
   // ************************ GenParticles ****************************
-  
+
+  double inCasGenPaEtaMax = -10.0;  
+  bool   inCasGenPaEtaMaxSet = false;  
+  double inCasGenPaEtaMin = 10.0;
+  bool   inCasGenPaEtaMinSet = false; 
   if(!isData){
+
+
+    //edm::Handle<GenEventInfoProduct> genEvent;
+    //iEvent.getByLabel("generator", genEvent);
+
     edm::Handle<reco::GenParticleCollection> genParticles;
     try { iEvent.getByLabel(_GenPartSrc,genParticles); } //hiGenParticles //genParticles
     catch (...) { edm::LogWarning(" GenPart ") << "No GenParticles found!" << std::endl; }
@@ -1452,6 +1553,14 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	//double energy = gen.energy();
 	double et = gen.pt();
 	double eta = gen.eta();
+	if (eta>-6.6 && eta<-5.2 && gen.energy()>5. && eta<inCasGenPaEtaMin) {
+	  inCasGenPaEtaMin = eta;
+	  inCasGenPaEtaMinSet = true;
+ 	}
+	if (eta>-6.6 && eta<-5.2 && gen.energy()>5. && eta>inCasGenPaEtaMax) {
+	  inCasGenPaEtaMax = eta;
+	  inCasGenPaEtaMaxSet = true;
+ 	}
 	//double rap = 0.5*ln((energy()+pz())/(energy()-pz()));//charge(); px();py();pz();mass();et();
 	const uint ibin = histosProfile_["energy_vs_eta_reco"]->FindBin( eta );		
 	if(ibin>=1 && ibin<=ForwardRecord::nbEtaBins) etaBinGenEts[ibin-1] += et;             
@@ -1459,6 +1568,7 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     for(uint ibin = 0; ibin < ForwardRecord::nbEtaBins; ibin++) etaBinGenEts_[ibin]->Fill(etaBinGenEts[ibin]);
   }
+  if (inCasGenPaEtaMaxSet && inCasGenPaEtaMinSet) histos1D_["incas_partgap_size"]->Fill(inCasGenPaEtaMax-inCasGenPaEtaMin);  
 
 
   // ********************************* Vertex **************************** 
@@ -1499,6 +1609,8 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
   double etTowerCastor = 0.0;    
+  int inCastorGenJets = 0;
+  int noBasicCastorJets = 0;
   if (_DoAdvanced) {
 
     // ************ Castor Towers
@@ -1513,10 +1625,12 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //vector<reco::GenJet>                  "ak5GenJets"                ""                "SIM"
     //https://github.com/UAEDF/UATree/blob/master/UABaseTree/src/GetGenJet.cc
     edm::Handle<reco::GenJetCollection> genjets;
-    try{
-      iEvent.getByLabel("ak7GenJets", genjets); //ak5GenJets
-    } catch(...) {
-      edm::LogWarning(" GenJets ") << " Cannot get GenJets " << std::endl;
+    if (!isData) {
+      try{
+	iEvent.getByLabel("ak7GenJets", genjets); //ak5GenJets
+      } catch(...) {
+	edm::LogWarning(" GenJets ") << " Cannot get GenJets " << std::endl;
+      }
     }
 
     // ************ CaloJets
@@ -1550,12 +1664,14 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     bool isCasTowEneGT300 = false;
     bool isCasTowEneGT500 = false;
     bool isCasTowEneGT750 = false;
+    bool noCasTowEneGT5 = 0;    
     if(ctowers.isValid() && ctowers.failedToGet() == 0) { 
       for(unsigned icand=0;icand<ctowers->size(); icand++) {
 	const reco::CastorTower ctower = ctowers->at(icand);
         etTowerCastor += ctower.et();
 	if (_ShowDebug) edm::LogVerbatim("CastorTowers") << "Castor tower energy = " << ctower.energy() << " eta = " << ctower.eta() << " phi = " << ctower.phi() << std::endl;
         histos1D_["cas_tow_ene"]->Fill(ctower.energy());
+	if (ctower.energy() > 5.0) noCasTowEneGT5++;	
 	if (ctower.energy() > 300.0) isCasTowEneGT300 = true;
 	if (ctower.energy() > 500.0) isCasTowEneGT500 = true;
 	if (ctower.energy() > 750.0) isCasTowEneGT750 = true;
@@ -1566,12 +1682,24 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //RECO level BasicCastorJet above a threshold  
     bool isBasCasJetEneGT400 = false;
     //bool isBasCasJetEneGT1000 = false;
+    reco::BasicJet leadingbasicjet;
+    bool leadingbasicjet_found = false;
     if (basicjetcoll.isValid() && basicjetcoll.failedToGet() == 0) {
       for(edm::View<reco::BasicJet>::const_iterator ibegin = basicjetcoll->begin(), iend = basicjetcoll->end(), ijet = ibegin; ijet != iend; ++ijet) {
 	unsigned int idx = ijet - ibegin;
-	const reco::BasicJet & basicjet = (*basicjetcoll)[idx];
+	const reco::BasicJet & basicjet = (*basicjetcoll)[idx];        
 	if (_ShowDebug) edm::LogVerbatim("BasicJets") << "Castor jet energy = " << basicjet.energy() << " eta = " << basicjet.eta() << " phi = " << basicjet.phi() << std::endl;
+	noBasicCastorJets++;
+	if (!leadingbasicjet_found) {
+	  leadingbasicjet = basicjet;
+          leadingbasicjet_found = true;
+	}
+	if (leadingbasicjet_found &&  basicjet.energy() > leadingbasicjet.energy()) leadingbasicjet = basicjet;
         histos1D_["cas_jet_ene"]->Fill(basicjet.energy());
+        if(!isData && genjets.isValid() && genjets.failedToGet() == 0) {
+	  const std::vector<reco::GenJet>& reco_genjets = *(genjets.product());
+	  histosEff_["turn_on_casbasjetene_match"]->Fill(isMatchedWithGen(basicjet,reco_genjets),basicjet.energy());
+        }
 	edm::RefToBase<reco::BasicJet> jetRef = basicjetcoll->refAt(idx);
 	reco::CastorJetID const & jetId = (*jetIdMap)[jetRef];
 	if (_ShowDebug) edm::LogVerbatim("BasicJets") << "Castor jet id fem =  " <<  jetId.fem << " eem = " << jetId.emEnergy << " ehad = " << jetId.hadEnergy << " width = " << jetId.width << " depth = " << jetId.depth << " fhot = " << jetId.fhot << " sigmaz = " << jetId.sigmaz << " ntower = " << jetId.nTowers << std::endl;
@@ -1583,6 +1711,18 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	//if (isBasCasJetEneGT500 && isBasCasJetEneGT1000) break;
 	//if (basicjet.energy() > 1000.0) isBasicCastorJetAbove1000 = true;
 	//if (isBasicCastorJetAbove500 && isBasicCastorJetAbove1000) break;
+	histos1D_["cas_jet_fem"]->Fill(jetId.fem);
+	histosProfile_["cas_jet_fem_vs_basjete"]->Fill(basicjet.energy(),jetId.fem);
+        histos1D_["cas_jet_width"]->Fill(jetId.width);
+	histosProfile_["cas_jet_fem_vs_basjete"]->Fill(basicjet.energy(),jetId.width);
+        histos1D_["cas_jet_depth"]->Fill(jetId.depth);
+	histosProfile_["cas_jet_fem_vs_basjete"]->Fill(basicjet.energy(),jetId.depth);
+        histos1D_["cas_jet_fhot"]->Fill(jetId.fhot);
+	histosProfile_["cas_jet_fem_vs_basjete"]->Fill(basicjet.energy(),jetId.fhot);
+        histos1D_["cas_jet_sigmaz"]->Fill(jetId.sigmaz);
+	histosProfile_["cas_jet_fem_vs_basjete"]->Fill(basicjet.energy(),jetId.sigmaz);
+        histos1D_["cas_jet_ntowers"]->Fill(jetId.nTowers);
+	histosProfile_["cas_jet_fem_vs_basjete"]->Fill(basicjet.energy(),jetId.nTowers);
       }
     }
 
@@ -1605,7 +1745,10 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     bool inCenEtaMaxSet = false;
     double inCasEtaMin = 10.0;
     bool inCasEtaMinSet = false;
-    if(genjets.isValid() && genjets.failedToGet() == 0) { 
+    reco::GenJet leading_genjet_castor;
+    bool leadgencasjet_found = false;
+    //for (unsigned iGenJet = 0; iGenJet < genJets->size(); ++iGenJet) {const reco::GenJet& genJet = (*genJets) [iGenJet];}    
+    if(!isData && genjets.isValid() && genjets.failedToGet() == 0) { 
       for(reco::GenJetCollection::const_iterator genjet = genjets->begin() ; genjet != genjets->end() ; ++genjet ){
 	if (_ShowDebug) edm::LogVerbatim("GenJets") << "GenJets px = " << genjet->px() << " py = " << genjet->py() << " pz = " << genjet->pz() << " ene = " << genjet->energy() << " eta = " << genjet->eta() << std::endl;
 	double eta = genjet->eta();
@@ -1618,6 +1761,13 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  inCasEtaMinSet = true;
  	}
 	if (genjet->eta()<-6.6 || genjet->eta()>-5.2) continue;
+	inCastorGenJets++;
+	if(!leadgencasjet_found) {
+          leading_genjet_castor = reco::GenJet(*genjet);
+	  leadgencasjet_found = true;
+	}
+	if(leadgencasjet_found && genjet->energy() > leading_genjet_castor.energy()) leading_genjet_castor = reco::GenJet(*genjet);
+        histos1D_["incas_jet_energy"]->Fill(genjet->energy());
 	histos1D_["incas_jet_energy_effdenom"]->Fill(genjet->energy());
 	if (isCasTowEneGT300) histos1D_["incas_jet_energy_th300_effpassing"]->Fill(genjet->energy());
         histosEff_["turn_on_casjetene_th300"]->Fill(isCasTowEneGT300,genjet->energy());
@@ -1628,14 +1778,22 @@ RHAnalyser::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
 
+    if (leadingbasicjet_found && leadgencasjet_found) {
+      histosEff_["turn_on_casleadbasjetene_match"]->Fill(isMatchedWithGen(leadingbasicjet,leading_genjet_castor),leadingbasicjet.energy()); 
+    }
+
     if (inCenEtaMaxSet && inCasEtaMinSet) {
       histos1D_["max_jetgap_size_effdenom"]->Fill(inCenEtaMax-inCasEtaMin);
       if (isBasCasJetEneGT400 && isCenJetPtGT20) histos1D_["max_jetgap_size_effpassing"]->Fill(inCenEtaMax-inCasEtaMin);
       histosEff_["max_jetgap_size_eff_thXY"]->Fill((isCenJetPtGT20 && isCasTowEneGT300),inCenEtaMax-inCasEtaMin);
     }
 
-  }
+    if (inCasGenPaEtaMinSet && inCasGenPaEtaMaxSet) histosEff_["max_pargap_size_eff_thXY"]->Fill((noCasTowEneGT5 == 0),inCasGenPaEtaMaxSet-inCasGenPaEtaMinSet);    
+
+  } //ctrl-alt-b,ctrl-alt-f
+  
   histos1D_["cas_towet"]->Fill(etTowerCastor);
+  histos2D_["incas_genjetno_vs_basjetno"]->Fill(noBasicCastorJets,inCastorGenJets);
 
   // ******************************
 
@@ -1721,6 +1879,26 @@ RHAnalyser::endJob()
   histos1D_["incas_jet_energy_th750_eff"]->Divide(histos1D_["incas_jet_energy_th750_effpassing"],histos1D_["incas_jet_energy_effdenom"],1.0,1.0);
   histos1D_["max_jetgap_size_eff"]->Divide(histos1D_["max_jetgap_size_effpassing"],histos1D_["max_jetgap_size_effdenom"],1.0,1.0);
 
+}
+
+bool
+RHAnalyser::isMatchedWithGen(const reco::BasicJet& basicjet, const std::vector<reco::GenJet>& genjets)//const reco::GenParticleCollection genParticles)//(const reco::GenParticle  p, trigger::TriggerObjectCollection triggerObjects)
+{
+  for (unsigned int i=0 ; i < genjets.size(); i++){
+    const reco::GenJet genj = genjets[i];
+    if (fabs(genj.eta())<5.0) continue;
+    double deltaR = sqrt(pow((genj.energy()-basicjet.energy())/genj.energy(),2.0)+pow(acos(cos(genj.phi()-basicjet.phi())),2.0)); //sqrt(pow(genj.eta()-basicjet.eta(),2.0)+pow(acos(cos(genj.phi()-basicjet.phi())),2.0));
+    if (deltaR<0.2) return true; //0.1
+  }
+  return false;
+}
+
+bool RHAnalyser::isMatchedWithGen(const reco::BasicJet& basicjet, const reco::GenJet& genjet) {
+  
+  double deltaR = fabs(acos(cos(genjet.phi()-basicjet.phi())));
+  if (deltaR<0.1) return true;
+
+  return false;
 }
 
 // ------------ method called when starting to processes a run  ------------
